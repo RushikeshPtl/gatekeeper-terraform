@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "invoke_functions_policy" {
 }
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
-  name       = "${var.env}-${var.project_name}-${var.name}"
+  name       = replace("${var.env}-${var.project_name}-${var.name}", "_", "-")
   role_arn   = aws_iam_role.role.arn
   type       = var.type
   definition = templatefile(var.template_file_path, var.template_vars)

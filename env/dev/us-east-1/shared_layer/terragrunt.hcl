@@ -22,8 +22,8 @@ inputs = {
   layer_name                = "shared_layer"
   compatible_runtimes       = ["python3.9"]
   path                      = "src/layers/"
-  env              = "${local.env_vars.locals.env}"
-  project_name     = "${local.env_vars.locals.project_name}"
+  env                       = "${local.env_vars.locals.env}"
+  project_name              = "${local.env_vars.locals.project_name}"
 }
 
 include {

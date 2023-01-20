@@ -23,7 +23,7 @@ resource "aws_s3_object" "s3_object" {
 }
 
 resource "aws_lambda_layer_version" "lambda_layer" {
-  layer_name          = "${var.env}-${var.project_name}-${var.layer_name}"
+  layer_name          = replace("${var.env}-${var.project_name}-${var.layer_name}", "_", "-")
   s3_bucket           = var.lambda_bucket_id
   s3_key              = aws_s3_object.s3_object.key
   s3_object_version   = aws_s3_object.s3_object.version_id

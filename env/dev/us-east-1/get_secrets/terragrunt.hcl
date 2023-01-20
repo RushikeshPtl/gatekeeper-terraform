@@ -41,7 +41,6 @@ inputs = {
     "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
   ]
   environment_variables = {
-    "ALLOWED_METHODS"      = "OPTIONS,POST,GET,PUT,PATCH,DELETE",
     "REGION_NAME"          = "us-east-1",
     "DATABASE_SECRET_NAME" = "stage/gatekeeper/rds/admin",
     "DATABASE_ENDPOINT"    = "hh-microservice-db.cou4r3yvy2cs.us-east-1.rds.amazonaws.com",
@@ -49,6 +48,7 @@ inputs = {
     "AMD_SECRET_NAME"      = "amd/token/DEV",
     "AMD_CREDS_NAME"       = "amd/creds/DEV"
     "UFT_TOKEN"            = "uft/stage",
+    "REDIS_CREDS_NAME"     = "ElastiCacheCreds",
   }
   layers = [dependency.shared_layer.outputs.layer_arn]
 }

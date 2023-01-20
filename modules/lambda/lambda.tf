@@ -24,7 +24,7 @@ resource "aws_s3_object" "s3_object" {
 }
 
 resource "aws_lambda_function" "lambda_function" {
-  function_name     = "${var.env}-${var.project_name}-${var.function_name}"
+  function_name     = replace("${var.env}-${var.project_name}-${var.function_name}", "_", "-")
   s3_bucket         = var.lambda_bucket_id
   s3_key            = aws_s3_object.s3_object.key
   s3_object_version = aws_s3_object.s3_object.version_id
@@ -34,6 +34,7 @@ resource "aws_lambda_function" "lambda_function" {
   role              = aws_iam_role.function_role.arn
   layers            = var.layers
   timeout           = var.timeout
+  memory_size       = var.memory_size
 
   environment {
     variables = var.environment_variables
@@ -75,7 +76,7 @@ data "aws_iam_policy_document" "lambda_trust_policy" {
 }
 
 resource "aws_iam_role" "function_role" {
-  name               = "${var.env}-${var.project_name}-${var.function_name}-role"
+  name               = replace("${var.env}-${var.project_name}-${var.function_name}-role", "_", "-")
   assume_role_policy = data.aws_iam_policy_document.lambda_trust_policy.json
 }
 
