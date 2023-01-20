@@ -1,6 +1,6 @@
 
 resource "aws_apigatewayv2_api" "apigateway" {
-  name          = "${var.env}-${var.project_name}-${var.name}-gw"
+  name          = replace("${var.env}-${var.project_name}-${var.name}-gw", "_", "-")
   protocol_type = "HTTP"
 }
 
