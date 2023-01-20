@@ -16,6 +16,16 @@ dependency "buckets" {
   }
 }
 
+dependency "packages_layer" {
+  config_path = "../packages_layer"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    layer_arn = ""
+  }
+}
+
 dependency "shared_layer" {
   config_path = "../shared_layer"
 
@@ -50,7 +60,10 @@ inputs = {
     "UFT_TOKEN"            = "uft/stage",
     "REDIS_CREDS_NAME"     = "ElastiCacheCreds",
   }
-  layers = [dependency.shared_layer.outputs.layer_arn]
+  layers = [
+    dependency.shared_layer.outputs.layer_arn,
+    dependency.packages_layer.outputs.layer_arn
+  ]
 }
 
 include {
