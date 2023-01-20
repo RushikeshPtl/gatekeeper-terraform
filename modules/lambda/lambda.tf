@@ -15,26 +15,16 @@ data "archive_file" "lambda_source_package" {
   output_path = local.lambda_output_path
 }
 
-
-resource "aws_s3_object" "s3_object" {
-  bucket = var.lambda_bucket_id
-  key    = "${var.function_name}.zip"
-  source = data.archive_file.lambda_source_package.output_path
-  etag   = filemd5(data.archive_file.lambda_source_package.output_path)
-}
-
 resource "aws_lambda_function" "lambda_function" {
-  function_name     = replace("${var.env}-${var.project_name}-${var.function_name}", "_", "-")
-  s3_bucket         = var.lambda_bucket_id
-  s3_key            = aws_s3_object.s3_object.key
-  s3_object_version = aws_s3_object.s3_object.version_id
-  runtime           = var.runtime
-  handler           = var.handler
-  source_code_hash  = data.archive_file.lambda_source_package.output_base64sha256
-  role              = aws_iam_role.function_role.arn
-  layers            = var.layers
-  timeout           = var.timeout
-  memory_size       = var.memory_size
+  function_name    = replace("${var.env}-${var.project_name}-${var.function_name}", "_", "-")
+  runtime          = var.runtime
+  handler          = var.handler
+  filename         = data.archive_file.lambda_source_package.output_path
+  source_code_hash = filebase64sha256(data.archive_file.lambda_source_package.output_path)
+  role             = aws_iam_role.function_role.arn
+  layers           = var.layers
+  timeout          = var.timeout
+  memory_size      = var.memory_size
 
   environment {
     variables = var.environment_variables
@@ -89,4 +79,29 @@ resource "aws_iam_role_policy_attachment" "policies" {
   count      = length(var.policies)
   role       = aws_iam_role.function_role.name
   policy_arn = var.policies[count.index]
+}
+
+
+resource "aws_apigatewayv2_integration" "apigateway_integration" {
+  count              = length(var.api_paths)
+  api_id             = var.apigateway_id
+  integration_uri    = aws_lambda_function.lambda_function.arn
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+}
+
+resource "aws_apigatewayv2_route" "apigateway_route" {
+  count     = length(var.api_paths)
+  api_id    = var.apigateway_id
+  route_key = "${var.api_paths[count.index].method} ${var.api_paths[count.index].path}"
+  target    = "integrations/${aws_apigatewayv2_integration.apigateway_integration[count.index].id}"
+}
+
+resource "aws_lambda_permission" "lambda_permission" {
+  count         = length(var.api_paths)
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.apigateway_execution_arn}/*/*"
 }

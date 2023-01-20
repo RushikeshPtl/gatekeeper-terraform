@@ -28,7 +28,7 @@ resource "aws_apigatewayv2_stage" "apigateway_stage" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gw" {
-  name              = "/aws/api_gw/${aws_apigatewayv2_api.apigateway.name}"
+  name              = replace("/aws/api_gw/${aws_apigatewayv2_api.apigateway.name}", "_", "-")
   retention_in_days = 30
 }
 

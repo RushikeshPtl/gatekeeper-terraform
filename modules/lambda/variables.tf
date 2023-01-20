@@ -1,8 +1,3 @@
-variable "lambda_bucket_id" {
-  description = "Name of the bucket to put the file in"
-  type        = string
-}
-
 variable "lambda_relative_path" {
   description = "The path to content to the archive "
   type        = string
@@ -65,3 +60,26 @@ variable "policies" {
   type        = list(string)
   default     = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 }
+
+variable "api_paths" {
+  type = list(object({
+    method = string
+    path   = string
+  }))
+
+  default = [
+  ]
+}
+
+variable "apigateway_id" {
+  description = "URI of the Lambda function for a Lambda proxy integration."
+  type        = string
+  default     = null
+}
+
+variable "apigateway_execution_arn" {
+  description = "The output of the archive file."
+  type        = string
+  default     = null
+}
+
