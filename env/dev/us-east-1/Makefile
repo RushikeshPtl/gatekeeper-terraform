@@ -6,6 +6,7 @@ apply:
 	find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
 	find . -type f -name ".terraform.lock.hcl" -prune -exec rm -rf {} \;
 	terragrunt run-all validate
+	terragrunt run-all plan
 	terragrunt run-all apply
 destroy:
 	find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;

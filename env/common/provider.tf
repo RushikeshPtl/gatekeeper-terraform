@@ -6,9 +6,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Environment = var.env
+      Env         = var.env
       ProjectName = var.project_name
-      ManagedBy = "Terraform"
+      ManagedBy   = "Terraform"
     }
   }
 }

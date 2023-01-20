@@ -7,7 +7,7 @@ terraform {
 }
 
 inputs = {
-  prefix       = "terraform-functions"
+  prefix       = "functions"
   env          = "${local.env_vars.locals.env}"
   project_name = "${local.env_vars.locals.project_name}"
 }
