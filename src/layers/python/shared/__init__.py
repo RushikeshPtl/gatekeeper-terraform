@@ -1,3 +1,4 @@
 import shared.error
-import shared.header
+from .error import NotFoundException, GateKeeperException
 
+import shared.header
