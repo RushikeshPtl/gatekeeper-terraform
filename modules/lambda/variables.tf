@@ -8,6 +8,11 @@ variable "function_name" {
   type        = string
 }
 
+variable "module_name" {
+  description = "Module name of function"
+  type        = string
+}
+
 variable "handler" {
   description = "Function entrypoint in your code."
   type        = string

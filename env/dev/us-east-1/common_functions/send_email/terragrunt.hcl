@@ -3,12 +3,12 @@ locals {
 }
 
 terraform {
-  source = "../../../..//modules/lambda"
+  source = "../../../../..//modules/lambda"
 }
 
 
 dependency "packages_layer" {
-  config_path = "../packages_layer"
+  config_path = "../../packages_layer"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -18,7 +18,7 @@ dependency "packages_layer" {
 }
 
 dependency "shared_layer" {
-  config_path = "../shared_layer"
+  config_path = "../../shared_layer"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -28,7 +28,7 @@ dependency "shared_layer" {
 }
 
 dependency "caller_identity" {
-  config_path = "../caller_identity"
+  config_path = "../../caller_identity"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
