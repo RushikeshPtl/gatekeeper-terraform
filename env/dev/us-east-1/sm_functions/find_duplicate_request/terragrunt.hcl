@@ -16,6 +16,16 @@ dependency "packages_layer" {
   }
 }
 
+dependency "shared_layer" {
+  config_path = "../../shared_layer"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    layer_arn = ""
+  }
+}
+
 dependency "caller_identity" {
   config_path = "../../caller_identity"
 
@@ -43,7 +53,7 @@ inputs = {
   lambda_relative_path = "/../../"
   function_name        = "find_duplicate_request"
   module_name          = "sm_functions"
-  handler              = "find_duplicate_request.lambda_handler"
+  handler              = "app.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128
   warmup_enabled       = true
@@ -58,7 +68,8 @@ inputs = {
     "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn
   }
   layers = [
-    dependency.packages_layer.outputs.layer_arn
+    dependency.packages_layer.outputs.layer_arn,
+    dependency.shared_layer.outputs.layer_arn
   ]
 }
 

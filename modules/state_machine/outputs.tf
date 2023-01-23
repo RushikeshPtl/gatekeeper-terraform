@@ -1,5 +1,5 @@
 
-output "status" {
+output "arn" {
   description = "ARN of Lambda Function"
-  value       = aws_sfn_state_machine.sfn_state_machine.status
+  value       = aws_sfn_state_machine.sfn_state_machine.arn
 }

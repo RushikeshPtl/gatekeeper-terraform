@@ -3,7 +3,7 @@
 locals {
   # Relative paths change if this configuration is
   # included as a module from Terragrunt.
-  lambda_source_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/${var.function_name}.py"
+  lambda_source_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/app.py"
   lambda_output_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/${var.function_name}.zip"
 }
 
@@ -28,6 +28,10 @@ resource "aws_lambda_function" "lambda_function" {
 
   environment {
     variables = var.environment_variables
+  }
+  vpc_config {
+       subnet_ids =var.subnet_ids
+       security_group_ids = var.security_group_ids
   }
 }
 

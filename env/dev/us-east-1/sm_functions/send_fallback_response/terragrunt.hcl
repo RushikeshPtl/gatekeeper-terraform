@@ -6,8 +6,6 @@ terraform {
   source = "../../../../..//modules/lambda"
 }
 
-
-
 dependency "packages_layer" {
   config_path = "../../packages_layer"
 
@@ -40,10 +38,43 @@ dependency "caller_identity" {
   }
 }
 
+dependency "get_secrets" {
+  config_path = "../../common_functions/get_secrets"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    function_name = "test"
+  }
+}
+
+dependency "send_email" {
+  config_path = "../../common_functions/send_email"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    function_name = "test"
+  }
+}
+
+dependency "log_request_error" {
+  config_path = "../log_request_error"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    function_name = "test"
+  }
+}
+
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "update_s3"
-  module_name          = "dashboard_functions"
+  function_name        = "send_fallback_response"
+  module_name          = "sm_functions"
   handler              = "app.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128
@@ -52,14 +83,16 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/Lambda-S3-Access"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess"
   ]
   environment_variables = {
-    "S3_BUCKET" = "hh-gatekeeper-stage-identity-pool"
+    "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
+    "LOG_REQUEST_ERROR_ARN" = ""
   }
   layers = [
-    dependency.shared_layer.outputs.layer_arn,
-    dependency.packages_layer.outputs.layer_arn
+    dependency.packages_layer.outputs.layer_arn,
+    dependency.shared_layer.outputs.layer_arn
   ]
 }
 

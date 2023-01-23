@@ -1,0 +1,156 @@
+{
+    "Comment": "state machine to validate Referral data and pass JSON to SQS",
+    "StartAt": "Convert To Generic JSON",
+    "States": {
+        "Convert To Generic JSON": {
+            "Type": "Task",
+            "Resource": "${ConvertUFTReferralArn}",
+            "TimeoutSeconds": 5,
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath":"$.error",
+                    "Next": "Send Fallback Response"
+                }
+            ],
+            "Next": "Validate Token"
+        },
+        "Validate Token": {
+            "Type": "Task",
+            "Resource": "${ValidateTokenArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath": "$.error",
+                    "Next": "Pass Validate Token Error Callback"
+                }
+            ],
+            "Next": "Validate Name"
+        },
+        "Validate Name": {
+            "Type": "Task",
+            "Resource": "${ValidateNameArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath": "$.error",
+                    "Next": "Pass Validate Name Error Callback"
+                }
+            ],
+            "Next": "Validate DOB"
+        },
+        "Validate DOB": {
+            "Type": "Task",
+            "Resource": "${ValidateDOBArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath": "$.error",
+                    "Next": "Pass Validate DOB Error Callback"
+                }
+            ],
+            "Next": "Validate General"
+        },
+        "Validate General": {
+            "Type": "Task",
+            "Resource": "${ValidateGeneralArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath": "$.error",
+                    "Next": "Pass Validate General Error Callback"
+                }
+            ],
+            "Next": "Find Duplicate Request"
+        },
+        "Find Duplicate Request":{
+            "Type": "Task",
+            "Resource": "${FindDuplicateRequestArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "ResultPath": "$.error",
+                    "Next": "Pass Find Duplicate Request Error Callback"
+                }
+            ],
+            "Next": "Save Referral Entry to DB"
+        },
+        "Save Referral Entry to DB": {
+            "Type": "Task",
+            "Resource": "${SaveReferralRequestArn}",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Send Fallback Response"
+                }
+            ],
+            "End": true
+        },
+        "Pass Validate Token Error Callback":{
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "Validate Token"
+            },
+            "ResultPath":"$.data",
+            "Next": "Send Fallback Response"
+        },
+        "Pass Validate Name Error Callback":{
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "Validate Name"
+            },
+            "ResultPath":"$.data",
+            "Next": "Send Fallback Response"
+        },
+        "Pass Validate DOB Error Callback":{
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "Validate DOB"
+            },
+            "ResultPath":"$.data",
+            "Next": "Send Fallback Response"
+        },
+        "Pass Validate General Error Callback":{
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "Validate General"
+            },
+            "ResultPath":"$.data",
+            "Next": "Send Fallback Response"
+        },
+        "Pass Find Duplicate Request Error Callback":{
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "Find Duplicate Request"
+            },
+            "ResultPath":"$.data",
+            "Next": "Send Fallback Response"
+        },
+        "Send Fallback Response": {
+            "Type": "Task",
+            "Resource": "${SendFallbackResponseArn}",
+            "End": true
+        }
+    }
+}
