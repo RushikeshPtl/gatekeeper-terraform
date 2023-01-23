@@ -15,17 +15,18 @@ data "archive_file" "lambda_source_package" {
   output_path = local.lambda_output_path
 }
 
-resource "aws_s3_object" "s3_object" {
-  bucket = var.lambda_bucket_id
-  key    = "${var.layer_name}.zip"
-  source = data.archive_file.lambda_source_package.output_path
-  etag   = filemd5(data.archive_file.lambda_source_package.output_path)
-}
+# resource "aws_s3_object" "s3_object" {
+#   bucket = var.lambda_bucket_id
+#   key    = "${var.layer_name}.zip"
+#   source = data.archive_file.lambda_source_package.output_path
+#   etag   = filemd5(data.archive_file.lambda_source_package.output_path)
+# }
 
 resource "aws_lambda_layer_version" "lambda_layer" {
   layer_name          = replace("${var.env}-${var.project_name}-${var.layer_name}", "_", "-")
-  s3_bucket           = var.lambda_bucket_id
-  s3_key              = aws_s3_object.s3_object.key
-  s3_object_version   = aws_s3_object.s3_object.version_id
+  filename           = local.lambda_output_path
+  # s3_bucket           = var.lambda_bucket_id
+  # s3_key              = aws_s3_object.s3_object.key
+  # s3_object_version   = aws_s3_object.s3_object.version_id
   compatible_runtimes = var.compatible_runtimes
 }

@@ -87,6 +87,7 @@ dependency "apigateway" {
 inputs = {
   lambda_relative_path = "/../../"
   function_name        = "login_user"
+  module_name          = "dashboard_functions"
   handler              = "login_user.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128

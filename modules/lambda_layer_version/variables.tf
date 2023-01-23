@@ -1,7 +1,7 @@
-variable "lambda_bucket_id" {
-  description = "Name of the bucket to put the file in"
-  type        = string
-}
+# variable "lambda_bucket_id" {
+#   description = "Name of the bucket to put the file in"
+#   type        = string
+# }
 
 variable "layer_name" {
   description = "Unique name for your Lambda Layer"

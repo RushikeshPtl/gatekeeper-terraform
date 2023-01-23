@@ -42,6 +42,7 @@ dependency "caller_identity" {
 inputs = {
   lambda_relative_path = "/../../"
   function_name        = "send_email"
+  module_name          = "common_functions"
   handler              = "send_email.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128

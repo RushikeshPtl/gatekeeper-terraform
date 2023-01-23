@@ -6,20 +6,8 @@ terraform {
   source = "../../../../..//modules/lambda"
 }
 
-
-
 dependency "packages_layer" {
   config_path = "../../packages_layer"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    layer_arn = ""
-  }
-}
-
-dependency "shared_layer" {
-  config_path = "../../shared_layer"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -40,11 +28,22 @@ dependency "caller_identity" {
   }
 }
 
+dependency "get_secrets" {
+  config_path = "../../common_functions/get_secrets"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    function_name = "test"
+  }
+}
+
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "update_s3"
-  module_name          = "dashboard_functions"
-  handler              = "update_s3.lambda_handler"
+  function_name        = "find_duplicate_request"
+  module_name          = "sm_functions"
+  handler              = "find_duplicate_request.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128
   warmup_enabled       = true
@@ -52,13 +51,13 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/Lambda-S3-Access"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess"
   ]
   environment_variables = {
-    "S3_BUCKET" = "hh-gatekeeper-stage-identity-pool"
+    "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn
   }
   layers = [
-    dependency.shared_layer.outputs.layer_arn,
     dependency.packages_layer.outputs.layer_arn
   ]
 }

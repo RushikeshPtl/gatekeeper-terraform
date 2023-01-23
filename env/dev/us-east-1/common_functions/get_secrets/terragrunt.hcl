@@ -30,6 +30,7 @@ dependency "shared_layer" {
 inputs = {
   lambda_relative_path = "/../../"
   function_name        = "get_secrets"
+  module_name          = "common_functions"
   handler              = "get_secrets.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128

@@ -8,15 +8,18 @@ terraform {
 
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "convert_uft_referral"
-  module_name          = "add_referral_to_amd"
-  handler              = "convert_uft_referral.lambda_handler"
+  function_name        = "validate_ssn"
+  module_name          = "sm_functions"
+  handler              = "validate_ssn.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128
   warmup_enabled       = true
   schedule             = "rate(5 minutes)"
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
+  environment_variables = {
+    "GET_ORG_TOKEN_ARN"          = "us-east-1"
+  }
 }
 
 include {
