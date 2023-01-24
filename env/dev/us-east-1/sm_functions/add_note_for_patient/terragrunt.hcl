@@ -6,6 +6,18 @@ terraform {
   source = "../../../../..//modules/lambda"
 }
 
+dependency "caller_identity" {
+  config_path = "../../caller_identity"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    account_id  = "1234567890"
+    caller_arn  = "1234567890_arn"
+    caller_user = "1234567890_user"
+  }
+}
+
 dependency "packages_layer" {
   config_path = "../../packages_layer"
 
@@ -26,18 +38,6 @@ dependency "shared_layer" {
   }
 }
 
-dependency "caller_identity" {
-  config_path = "../../caller_identity"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    account_id  = "1234567890"
-    caller_arn  = "1234567890_arn"
-    caller_user = "1234567890_user"
-  }
-}
-
 dependency "get_secrets" {
   config_path = "../../common_functions/get_secrets"
 
@@ -49,31 +49,9 @@ dependency "get_secrets" {
   }
 }
 
-dependency "send_email" {
-  config_path = "../../common_functions/send_email"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    invoke_arn    = "test"
-    function_name = "test"
-  }
-}
-
-dependency "log_request_error" {
-  config_path = "../log_request_error"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    invoke_arn    = "test"
-    function_name = "test"
-  }
-}
-
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "send_fallback_response"
+  function_name        = "add_note_for_patient"
   module_name          = "sm_functions"
   handler              = "app.lambda_handler"
   runtime              = "python3.9"
@@ -83,12 +61,10 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
-    "LOG_REQUEST_ERROR_ARN" = dependency.log_request_error.outputs.invoke_arn
+    "GET_SECRET_ARN"          = dependency.get_secrets.outputs.invoke_arn
   }
   layers = [
     dependency.packages_layer.outputs.layer_arn,

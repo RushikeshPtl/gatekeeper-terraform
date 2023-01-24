@@ -6,6 +6,26 @@ terraform {
   source = "../../../../..//modules/lambda"
 }
 
+dependency "packages_layer" {
+  config_path = "../../packages_layer"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    layer_arn = ""
+  }
+}
+
+dependency "shared_layer" {
+  config_path = "../../shared_layer"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    layer_arn = ""
+  }
+}
+
 dependency "caller_identity" {
   config_path = "../../caller_identity"
 
@@ -30,7 +50,7 @@ dependency "apigateway" {
 }
 
 dependency "get_secrets" {
-  config_path = "../get_secrets"
+  config_path = "../../common_functions/get_secrets"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -40,21 +60,10 @@ dependency "get_secrets" {
   }
 }
 
-dependency "validate_referral_state_machine" {
-    config_path = "../../validate_referral_state_machine"
-
-    mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-    mock_outputs_merge_strategy_with_state  = "shallow"
-    mock_outputs = {
-    arn        = "test"
-  }
-}
-
-
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "add_referral_endpoint"
-  module_name          = "common_functions"
+  function_name        = "lookup_ref_provider"
+  module_name          = "sm_functions"
   handler              = "app.lambda_handler"
   runtime              = "python3.9"
   memory_size          = 128
@@ -63,28 +72,22 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/AWSStepFunctionsFullAccess"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN"             = dependency.get_secrets.outputs.invoke_arn,
-    "VALIDATE_REFERRAL_SM_ARN"   = dependency.validate_referral_state_machine.outputs.arn
+    "GET_SECRET_ARN"          = dependency.get_secrets.outputs.invoke_arn
   }
   apigateway_id            = dependency.apigateway.outputs.api_id
   apigateway_execution_arn = dependency.apigateway.outputs.execution_arn
   api_paths = [
     {
-        "method" = "POST",
-        "path"   = "/referral/{type}"
-    },
-    {
-        "method" = "POST",
-        "path"   = "/api/member"
-    },
-    {
-        "method" = "PUT",
-        "path"   = "/update_referral/{type}/{request_id}"
+        "method" = "GET",
+        "path"   = "/amd/get-referral-providers"
     }
+  ]
+  layers = [
+    dependency.packages_layer.outputs.layer_arn,
+    dependency.shared_layer.outputs.layer_arn
   ]
 }
 

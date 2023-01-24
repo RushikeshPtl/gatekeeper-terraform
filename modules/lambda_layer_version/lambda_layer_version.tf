@@ -25,6 +25,7 @@ data "archive_file" "lambda_source_package" {
 resource "aws_lambda_layer_version" "lambda_layer" {
   layer_name          = replace("${var.env}-${var.project_name}-${var.layer_name}", "_", "-")
   filename           = local.lambda_output_path
+  source_code_hash  = data.archive_file.lambda_source_package.output_base64sha256
   # s3_bucket           = var.lambda_bucket_id
   # s3_key              = aws_s3_object.s3_object.key
   # s3_object_version   = aws_s3_object.s3_object.version_id

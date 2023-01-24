@@ -49,19 +49,8 @@ dependency "get_secrets" {
   }
 }
 
-dependency "send_email" {
-  config_path = "../../common_functions/send_email"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    invoke_arn    = "test"
-    function_name = "test"
-  }
-}
-
-dependency "log_request_error" {
-  config_path = "../log_request_error"
+dependency "find_relationship_id" {
+  config_path = "../find_relationship_id"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -73,7 +62,7 @@ dependency "log_request_error" {
 
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "send_fallback_response"
+  function_name        = "add_responsible_party"
   module_name          = "sm_functions"
   handler              = "app.lambda_handler"
   runtime              = "python3.9"
@@ -83,12 +72,11 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
-    "LOG_REQUEST_ERROR_ARN" = dependency.log_request_error.outputs.invoke_arn
+    "GET_SECRET_ARN"          = dependency.get_secrets.outputs.invoke_arn,
+    "FIND_RELATIONSHIP_ID_ARN"= dependency.find_relationship_id.outputs.invoke_arn
   }
   layers = [
     dependency.packages_layer.outputs.layer_arn,

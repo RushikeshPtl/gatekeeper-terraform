@@ -1,7 +1,12 @@
 output "invoke_arn" {
-  description = "ARN of Lambda Function"
+  description = "Invoke ARN of Lambda Function"
   value       = aws_lambda_function.lambda_function.invoke_arn
 
+}
+
+output "resource_arn" {
+  description = "Resource ARN of Lambda Function"
+  value       = aws_lambda_function.lambda_function.arn
 }
 
 output "function_name" {

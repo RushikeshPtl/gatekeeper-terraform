@@ -8,8 +8,8 @@ terraform {
   source = "../../../..//modules/state_machine"
 }
 
-dependency "convert" {
-  config_path = "../../sm_functions/convert"
+dependency "find_patient_details" {
+  config_path = "../../sm_functions/find_patient_details"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -19,8 +19,8 @@ dependency "convert" {
   }
 }
 
-dependency "validate_token" {
-  config_path = "../../sm_functions/validate_token"
+dependency "lookup_responsible_party" {
+  config_path = "../../sm_functions/lookup_responsible_party"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -30,8 +30,8 @@ dependency "validate_token" {
   }
 }
 
-dependency "validate_name" {
-  config_path = "../../sm_functions/validate_name"
+dependency "add_responsible_party" {
+  config_path = "../../sm_functions/add_responsible_party"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -41,8 +41,8 @@ dependency "validate_name" {
   }
 }
 
-dependency "validate_dob" {
-  config_path = "../../sm_functions/validate_dob"
+dependency "add_patient" {
+  config_path = "../../sm_functions/add_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -52,8 +52,8 @@ dependency "validate_dob" {
   }
 }
 
-dependency "validate_ssn" {
-  config_path = "../../sm_functions/validate_ssn"
+dependency "add_note_for_patient" {
+  config_path = "../../sm_functions/add_note_for_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -63,8 +63,8 @@ dependency "validate_ssn" {
   }
 }
 
-dependency "validate_general" {
-  config_path = "../../sm_functions/validate_general"
+dependency "add_referral_for_patient" {
+  config_path = "../../sm_functions/add_referral_for_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -74,30 +74,8 @@ dependency "validate_general" {
   }
 }
 
-dependency "log_request_error" {
-  config_path = "../../sm_functions/log_request_error"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    invoke_arn    = "test"
-    resource_arn  = "test"
-  }
-}
-
-dependency "find_duplicate_request" {
-  config_path = "../../sm_functions/find_duplicate_request"
-
-  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
-  mock_outputs = {
-    invoke_arn    = "test"
-    resource_arn  = "test"
-  }
-}
-
-dependency "save_referral_request" {
-  config_path = "../../sm_functions/save_referral_request"
+dependency "add_note_to_referral" {
+  config_path = "../../sm_functions/add_note_to_referral"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -118,31 +96,42 @@ dependency "send_fallback_response" {
   }
 }
 
+dependency "log_request_error" {
+  config_path = "../../sm_functions/log_request_error"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    resource_arn  = "test"
+  }
+}
+
 inputs = {
-    name                   = "ValidateReferral"
+    name                   = "AddReferralToAmd"
     policy_file_path       = local.policy_file_path
     role_file_path         = local.role_policy_file_path
     template_file_path     = local.definition_file_path
     template_vars          = {
-        "ConvertUFTReferralArn"     = "${dependency.convert.outputs.resource_arn}",
-        "ValidateTokenArn"          = "${dependency.validate_token.outputs.resource_arn}",
-        "ValidateDOBArn"            = "${dependency.validate_dob.outputs.resource_arn}",
-        "ValidateNameArn"           = "${dependency.validate_name.outputs.resource_arn}",
-        "ValidateSSNArn"            = "${dependency.validate_ssn.outputs.resource_arn}",
-        "ValidateGeneralArn"        = "${dependency.validate_general.outputs.resource_arn}",
-        "FindDuplicateRequestArn"   = "${dependency.find_duplicate_request.outputs.resource_arn}",
-        "SaveReferralRequestArn"    = "${dependency.save_referral_request.outputs.resource_arn}",
-        "SendFallbackResponseArn"   = "${dependency.send_fallback_response.outputs.resource_arn}"
+        "FindPatientDetailsOnAMDArn"     = "${dependency.find_patient_details.outputs.resource_arn}",
+        "LookupResponsiblePartyArn"          = "${dependency.lookup_responsible_party.outputs.resource_arn}",
+        "AddNoteToPatientArn"            = "${dependency.add_note_for_patient.outputs.resource_arn}",
+        "AddResponsiblePartyArn"           = "${dependency.add_responsible_party.outputs.resource_arn}",
+        "AddPatientArn"            = "${dependency.add_patient.outputs.resource_arn}",
+        "AddReferralsForPatientArn"        = "${dependency.add_referral_for_patient.outputs.resource_arn}",
+        "SendFallbackResponseArn"   = "${dependency.send_fallback_response.outputs.resource_arn}",
+        "LogRequestError"    = "${dependency.log_request_error.outputs.resource_arn}",
+        "AddReferralNoteArn"   = "${dependency.add_note_to_referral.outputs.resource_arn}"
     },
     function_arns           = [
-        dependency.convert.outputs.resource_arn,
-        dependency.validate_token.outputs.resource_arn,
-        dependency.validate_dob.outputs.resource_arn,
-        dependency.validate_name.outputs.resource_arn,
-        dependency.validate_ssn.outputs.resource_arn,
-        dependency.validate_general.outputs.resource_arn,
-        dependency.find_duplicate_request.outputs.resource_arn,
-        dependency.save_referral_request.outputs.resource_arn,
+        dependency.find_patient_details.outputs.resource_arn,
+        dependency.lookup_responsible_party.outputs.resource_arn,
+        dependency.add_responsible_party.outputs.resource_arn,
+        dependency.add_patient.outputs.resource_arn,
+        dependency.add_note_for_patient.outputs.resource_arn,
+        dependency.add_referral_for_patient.outputs.resource_arn,
+        dependency.add_note_to_referral.outputs.resource_arn,
+        dependency.log_request_error.outputs.resource_arn,
         dependency.send_fallback_response.outputs.resource_arn
     ]
 }
