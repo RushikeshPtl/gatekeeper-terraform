@@ -71,7 +71,6 @@ dependency "apigateway" {
     }
 }
 
-
 inputs = {
     lambda_relative_path = "/../../"
     function_name        = "add_organization_assets"
