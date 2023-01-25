@@ -27,6 +27,18 @@ dependency "shared_layer" {
   }
 }
 
+dependency "caller_identity" {
+  config_path = "../../caller_identity"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    account_id  = "1234567890"
+    caller_arn  = "1234567890_arn"
+    caller_user = "1234567890_user"
+  }
+}
+
 dependency "get_secrets" {
   config_path = "../get_secrets"
 
