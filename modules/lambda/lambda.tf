@@ -85,7 +85,6 @@ resource "aws_iam_role_policy_attachment" "policies" {
   policy_arn = var.policies[count.index]
 }
 
-
 resource "aws_apigatewayv2_integration" "apigateway_integration" {
   count              = length(var.api_paths)
   api_id             = var.apigateway_id
