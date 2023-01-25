@@ -1,0 +1,342 @@
+{
+    "Comment": "state machine to add referral data to AMD and update referral entry on DB",
+    "StartAt": "Find Patient Details on AMD",
+    "States": {
+        "Find Patient Details on AMD": {
+            "Type": "Task",
+            "Resource": "${FindPatientDetailsOnAMDArn}",
+            "Next": "Does Patient exist on AMD",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass FindPatientDetails Error"
+                }
+            ]
+        },
+        "Does Patient exist on AMD": {
+            "Type": "Choice",
+            "Choices": [
+                {"Or": [
+                        {
+                            "Variable": "$.msg",
+                            "StringEquals": "Patient & Responsible already registered"
+                        },
+                        {
+                            "Variable": "$.msg",
+                            "StringEquals": "Patient exists & Responsible party not present in generic"
+                        }
+                ],
+                    "Next": "Add Patient Note"
+                },
+                {"Or": [
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Add responsible party"
+                    },
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Add patient & responsible party"
+                    },
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Add patient"
+                    }
+                ],
+                    "Next": "Lookup for Responsible Party"
+                },
+                
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Log Error",
+                    "Next": "Log Referral Request Error"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Error occured while accessing the token",
+                    "Next": "Send Fallback Response"
+                }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Lookup for Responsible Party": {
+            "Type": "Task",
+            "Resource": "${LookupResponsiblePartyArn}",
+            "Next": "Does responsible party need to be added?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass LookupResponsibleParty Error"
+                }
+            ]
+        },
+        "Does responsible party need to be added?": {
+            "Type": "Choice",
+            "Choices": [
+                {"Or": [
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Add responsible party"
+                    },
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Add patient & responsible party"
+                    }
+                ],
+                    "Next": "Add Responsible Party"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Add patient",
+                    "Next": "Add Patient Details"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Add patient note",
+                    "Next": "Add Patient Note"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Log Error",
+                    "Next": "Log Referral Request Error"
+                }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Add Responsible Party": {
+            "Type": "Task",
+            "Resource": "${AddResponsiblePartyArn}",
+            "Next": "Does patient need to be added?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass AddResponsibleParty Error"
+                }
+            ]
+        },
+        "Does patient need to be added?": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Add Patient",
+                    "Next": "Add Patient Details"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Add Patient Note",
+                    "Next": "Add Patient Note"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Log Error",
+                    "Next": "Log Referral Request Error"
+                }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Add Patient Details": {
+            "Type": "Task",
+            "Resource": "${AddPatientArn}",
+            "Next": "Error While Adding Patient ?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass AddPatient Error"
+                }
+            ]
+        },
+        "Error While Adding Patient ?": {
+            "Type": "Choice",
+            "Choices": [
+            {
+                "Variable": "$.msg",
+                "StringEquals": "Add Patient Note",
+                "Next": "Add Patient Note"
+            },
+            {
+                "Variable": "$.msg",
+                "StringEquals": "Log Error",
+                "Next": "Log Referral Request Error"
+            }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Add Patient Note": {
+            "Type": "Task",
+            "Resource": "${AddNoteToPatientArn}",
+            "Next": "Error While Adding Note ?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass CheckPatientNoteExists Error"
+                }
+            ]
+        },
+        "Error While Adding Note ?": {
+            "Type": "Choice",
+            "Choices": [
+                {"Or":[
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "Note added"
+                    },
+                    {
+                        "Variable": "$.msg",
+                        "StringEquals": "No referring provider"
+                    }
+            ],
+            "Next": "Add Referrals For Patient"
+            },
+            {
+                "Variable": "$.msg",
+                "StringEquals": "Log Error",
+                "Next": "Log Referral Request Error"
+            }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Add Referrals For Patient": {
+            "Type": "Task",
+            "Resource": "${AddReferralsForPatientArn}",
+            "Next": "Error While Adding Referral ?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass AddReferralsForPatient Error"
+                }
+            ]
+        },
+        "Error While Adding Referral ?":{
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Referral added successfully",
+                    "Next": "Add Referrals Note"
+                },
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Log Error",
+                    "Next": "Log Referral Request Error"
+                }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Add Referrals Note": {
+            "Type": "Task",
+            "Resource": "${AddReferralNoteArn}",
+            "Next": "Error While Adding Referral Note?",
+            "Catch": [
+                {
+                    "ErrorEquals": [
+                        "States.Timeout",
+                        "States.TaskFailed"
+                    ],
+                    "Next": "Pass AddNoteToReferral Error"
+                }
+            ]
+        },
+        "Error While Adding Referral Note?":{
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.msg",
+                    "StringEquals": "Log Error",
+                    "Next": "Log Referral Request Error"
+                }
+            ],
+            "Default": "Send Fallback Response"
+        },
+        "Pass AddPatient Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "AddPatient",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass FindPatientDetails Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "FindPatientDetails",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass CheckPatientNoteExists Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "CheckPatientNoteExists",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass AddResponsibleParty Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "AddResponsibleParty",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass AddReferralsForPatient Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "AddReferralsForPatient",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass AddNoteToReferral Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "AddNoteToReferral",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Pass LookupResponsibleParty Error": {
+            "Type": "Pass",
+            "Result": {
+                "fn_name": "CheckReferralNoteExists",
+                "error_type": "fn timeout"
+            },
+            "ResultPath": "$.error",
+            "Next": "Send Fallback Response"
+        },
+        "Log Referral Request Error": {
+            "Type": "Task",
+            "Resource": "${LogRequestError}",
+            "End": true
+        },
+        "Send Fallback Response": {
+            "Type": "Task",
+            "Resource": "${SendFallbackResponseArn}",
+            "End": true
+        }
+    }
+}

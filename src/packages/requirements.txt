@@ -1,0 +1,9 @@
+aws_lambda_powertools
+# bcrypt
+# boto3
+# requests
+# sqlalchemy
+# aws-psycopg2
+# psycopg2-binary
+# redis
+# pytz
