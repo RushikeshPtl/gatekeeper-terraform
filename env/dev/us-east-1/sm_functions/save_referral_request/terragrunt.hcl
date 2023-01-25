@@ -76,6 +76,7 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess",
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/EC2Access",
+    "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
   ]
   environment_variables = {
     "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
