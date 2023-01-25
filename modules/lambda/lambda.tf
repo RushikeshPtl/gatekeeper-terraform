@@ -30,8 +30,8 @@ resource "aws_lambda_function" "lambda_function" {
     variables = var.environment_variables
   }
   vpc_config {
-       subnet_ids =var.subnet_ids
-       security_group_ids = var.security_group_ids
+       subnet_ids         = var.include_vpc ? var.subnet_ids : []
+       security_group_ids = var.include_vpc ? var.security_group_ids : []
   }
 }
 
@@ -60,8 +60,8 @@ resource "aws_lambda_permission" "allow_events_bridge_to_run_lambda" {
 
 data "aws_iam_policy_document" "lambda_trust_policy" {
   statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
+    actions       = ["sts:AssumeRole"]
+    effect        = "Allow"
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
@@ -103,7 +103,7 @@ resource "aws_apigatewayv2_route" "apigateway_route" {
 
 resource "aws_lambda_permission" "lambda_permission" {
   count         = length(var.api_paths)
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = length(var.api_paths) == 1 ? "AllowExecutionFromAPIGateway" : "AllowExecutionFromAPIGateway-${count.index}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function.function_name
   principal     = "apigateway.amazonaws.com"

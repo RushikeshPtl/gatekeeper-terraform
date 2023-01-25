@@ -9,7 +9,7 @@ terraform {
 }
 
 dependency "convert" {
-  config_path = "../../sm_functions/convert"
+  config_path = "../sm_functions/convert"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -20,7 +20,7 @@ dependency "convert" {
 }
 
 dependency "validate_token" {
-  config_path = "../../sm_functions/validate_token"
+  config_path = "../sm_functions/validate_token"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -31,7 +31,7 @@ dependency "validate_token" {
 }
 
 dependency "validate_name" {
-  config_path = "../../sm_functions/validate_name"
+  config_path = "../sm_functions/validate_name"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -42,7 +42,7 @@ dependency "validate_name" {
 }
 
 dependency "validate_dob" {
-  config_path = "../../sm_functions/validate_dob"
+  config_path = "../sm_functions/validate_dob"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -53,7 +53,7 @@ dependency "validate_dob" {
 }
 
 dependency "validate_ssn" {
-  config_path = "../../sm_functions/validate_ssn"
+  config_path = "../sm_functions/validate_ssn"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -64,7 +64,7 @@ dependency "validate_ssn" {
 }
 
 dependency "validate_general" {
-  config_path = "../../sm_functions/validate_general"
+  config_path = "../sm_functions/validate_general"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -75,7 +75,7 @@ dependency "validate_general" {
 }
 
 dependency "log_request_error" {
-  config_path = "../../sm_functions/log_request_error"
+  config_path = "../sm_functions/log_request_error"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -86,7 +86,7 @@ dependency "log_request_error" {
 }
 
 dependency "find_duplicate_request" {
-  config_path = "../../sm_functions/find_duplicate_request"
+  config_path = "../sm_functions/find_duplicate_request"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -97,7 +97,7 @@ dependency "find_duplicate_request" {
 }
 
 dependency "save_referral_request" {
-  config_path = "../../sm_functions/save_referral_request"
+  config_path = "../sm_functions/save_referral_request"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -108,7 +108,7 @@ dependency "save_referral_request" {
 }
 
 dependency "send_fallback_response" {
-  config_path = "../../sm_functions/send_fallback_response"
+  config_path = "../sm_functions/send_fallback_response"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"

@@ -64,7 +64,7 @@ inputs = {
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/AWSStepFunctionsFullAccess"
+    "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess",
   ]
   environment_variables = {
     "GET_SECRET_ARN"             = dependency.get_secrets.outputs.invoke_arn,

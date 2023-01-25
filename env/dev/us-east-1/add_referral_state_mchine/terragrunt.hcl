@@ -9,7 +9,7 @@ terraform {
 }
 
 dependency "find_patient_details" {
-  config_path = "../../sm_functions/find_patient_details"
+  config_path = "../sm_functions/find_patient_details"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -20,7 +20,7 @@ dependency "find_patient_details" {
 }
 
 dependency "lookup_responsible_party" {
-  config_path = "../../sm_functions/lookup_responsible_party"
+  config_path = "../sm_functions/lookup_responsible_party"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -31,7 +31,7 @@ dependency "lookup_responsible_party" {
 }
 
 dependency "add_responsible_party" {
-  config_path = "../../sm_functions/add_responsible_party"
+  config_path = "../sm_functions/add_responsible_party"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -42,7 +42,7 @@ dependency "add_responsible_party" {
 }
 
 dependency "add_patient" {
-  config_path = "../../sm_functions/add_patient"
+  config_path = "../sm_functions/add_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -53,7 +53,7 @@ dependency "add_patient" {
 }
 
 dependency "add_note_for_patient" {
-  config_path = "../../sm_functions/add_note_for_patient"
+  config_path = "../sm_functions/add_note_for_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -64,7 +64,7 @@ dependency "add_note_for_patient" {
 }
 
 dependency "add_referral_for_patient" {
-  config_path = "../../sm_functions/add_referral_for_patient"
+  config_path = "../sm_functions/add_referral_for_patient"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -75,7 +75,7 @@ dependency "add_referral_for_patient" {
 }
 
 dependency "add_note_to_referral" {
-  config_path = "../../sm_functions/add_note_to_referral"
+  config_path = "../sm_functions/add_note_to_referral"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -86,7 +86,7 @@ dependency "add_note_to_referral" {
 }
 
 dependency "send_fallback_response" {
-  config_path = "../../sm_functions/send_fallback_response"
+  config_path = "../sm_functions/send_fallback_response"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
@@ -97,7 +97,7 @@ dependency "send_fallback_response" {
 }
 
 dependency "log_request_error" {
-  config_path = "../../sm_functions/log_request_error"
+  config_path = "../sm_functions/log_request_error"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
