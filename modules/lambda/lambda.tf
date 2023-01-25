@@ -30,7 +30,7 @@ resource "aws_lambda_function" "lambda_function" {
     variables = var.environment_variables
   }
   vpc_config {
-       subnet_ids =var.subnet_ids
+       subnet_ids         = var.subnet_ids
        security_group_ids = var.security_group_ids
   }
 }
@@ -60,8 +60,8 @@ resource "aws_lambda_permission" "allow_events_bridge_to_run_lambda" {
 
 data "aws_iam_policy_document" "lambda_trust_policy" {
   statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
+    actions       = ["sts:AssumeRole"]
+    effect        = "Allow"
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
