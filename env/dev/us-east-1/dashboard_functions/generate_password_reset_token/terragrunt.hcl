@@ -70,6 +70,17 @@ dependency "expire_reset_password_token" {
     }
 }
 
+dependency "apigateway" {
+    config_path = "../../apigateway"
+
+    mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
+    mock_outputs = {
+        api_id        = "test"
+        execution_arn = "arn:aws:events:eu-west-1:111122223333:rule/RunDaily"
+    }
+}
+
 inputs = {
     lambda_relative_path = "/../../"
     function_name        = "generate_password_reset_token"
