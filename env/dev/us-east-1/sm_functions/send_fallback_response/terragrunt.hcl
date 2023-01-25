@@ -80,11 +80,13 @@ inputs = {
   memory_size          = 128
   warmup_enabled       = true
   schedule             = "rate(5 minutes)"
+  include_vpc          = true
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   policies = [
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
-    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess"
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess",
+    "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/EC2Access"
   ]
   environment_variables = {
     "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,

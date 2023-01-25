@@ -100,3 +100,9 @@ variable "security_group_ids" {
   default     = ["sg-081946533c970c401"]
 }
 
+variable "include_vpc" {
+  description = "Flag for vpc"
+  type        = bool
+  default     = false
+}
+
