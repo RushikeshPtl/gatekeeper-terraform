@@ -66,7 +66,7 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "AMD_SECRET_NAME" = "md/token/${local.env_vars.env}",
+    "AMD_SECRET_NAME" = "md/token/${local.env_vars.locals.env}",
     "GET_SECRET_ARN"  = dependency.get_secrets.outputs.invoke_arn,
   }
   layers = [
