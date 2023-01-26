@@ -26,7 +26,6 @@ inputs = {
     runtime              = "python3.9"
     memory_size          = 128
     warmup_enabled       = true
-    include_vpc          = true
     schedule             = "rate(60 minutes)"
     env                  = "${local.env_vars.locals.env}"
     project_name         = "${local.env_vars.locals.project_name}"
