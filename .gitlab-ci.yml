@@ -1,13 +1,76 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+image:
+  name: cytopia/terragrunt:1.3-0.39
+
 stages:
-- test
+  - lint
+  - dev_plan
+  - dev_apply
+  - prod_plan
+  - prod_apply
+  - test
+
 sast:
   stage: test
+
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
+lint:
+  stage: lint
+  script:
+    - cd env/dev/us-east-1
+    - terragrunt run-all init -backend=false
+    - terragrunt run-all validate
+    - terragrunt run-all fmt -check
+  rules:
+    - if: "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(main|develop)$/"
+
+dev_plan:
+  stage: dev_plan
+  before_script:
+    - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+  script:
+    - cd env/dev/us-east-1
+    - terragrunt run-all init
+    - terragrunt run-all plan
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+dev_apply:
+  stage: dev_apply
+  before_script:
+    - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+  script:
+    - cd env/dev/us-east-1
+    - terragrunt run-all init
+    - terragrunt run-all apply -auto-approve
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: manual
+
+prod_plan:
+  stage: prod_plan
+  before_script:
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  script:
+    - cd env/prod/us-east-1
+    - terragrunt run-all init
+    - terragrunt run-all plan
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+prod_apply:
+  stage: prod_apply
+  before_script:
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  script:
+    - cd env/prod/us-east-1
+    - terragrunt run-all init
+    - terragrunt run-all apply -auto-approve
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
