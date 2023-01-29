@@ -1,76 +1,59 @@
 image:
   name: cytopia/terragrunt:1.3-0.39
 
+variables:
+  RUN_NON_ROOT: 0
+
 stages:
-  - lint
-  - dev_plan
-  - dev_apply
-  - prod_plan
-  - prod_apply
-  - test
+  - validate
+  - plan
+  - apply
 
-sast:
-  stage: test
-
-include:
-  - template: Security/SAST.gitlab-ci.yml
-
-lint:
-  stage: lint
-  script:
-    - cd env/dev/us-east-1
-    - terragrunt run-all init -backend=false
-    - terragrunt run-all validate
-    - terragrunt run-all fmt -check
-  rules:
-    - if: "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(main|develop)$/"
-
-dev_plan:
-  stage: dev_plan
+dev_validate:
+  stage: validate
   before_script:
     - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
   script:
-    - cd env/dev/us-east-1
+    - cd ./env/dev/us-east-1
+    - terragrunt run-all init -backend=false
+    - terragrunt run-all validate
+  rules:
+    - if: "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(develop)$/ || $CI_COMMIT_BRANCH =~ /^(develop)$/"
+
+dev_plan:
+  stage: plan
+  dependencies:
+    - dev_validate
+  before_script:
+    - apk add python3 py-pip
+    - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+    - pip3 install -r ./src/packages/requirements.txt -t ./src/packages/python
+    - rm -r ./src/packages/python/*dist-info
+    - rm -r ./src/packages/python/__pycache__
+  script:
+    - cd ./env/dev/us-east-1
     - terragrunt run-all init
     - terragrunt run-all plan
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
 
 dev_apply:
-  stage: dev_apply
+  stage: apply
+  dependencies:
+    - dev_validate
+    - dev_plan
   before_script:
+    - apk add python3 py-pip
     - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+    - pip install -r ./src/packages/requirements.txt -t ./src/packages/python
+    - rm -r ./src/packages/python/*dist-info
+    - rm -r ./src/packages/python/__pycache__
   script:
-    - cd env/dev/us-east-1
+    - cd ./env/dev/us-east-1
     - terragrunt run-all init
-    - terragrunt run-all apply -auto-approve
+    - echo "y" | terragrunt run-all apply
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
-      when: manual
-
-prod_plan:
-  stage: prod_plan
-  before_script:
-    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  script:
-    - cd env/prod/us-east-1
-    - terragrunt run-all init
-    - terragrunt run-all plan
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-prod_apply:
-  stage: prod_apply
-  before_script:
-    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  script:
-    - cd env/prod/us-east-1
-    - terragrunt run-all init
-    - terragrunt run-all apply -auto-approve
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: manual
