@@ -57,4 +57,3 @@ dev_apply:
     - echo "y" | terragrunt run-all apply
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
-
