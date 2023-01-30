@@ -51,6 +51,6 @@ dev_apply:
     - rm -r ./src/packages/python/__pycache__
   script:
     - cd ./env/dev/us-east-1
-    - echo "y" | terragrunt run-all apply -parallelism=5
+    - echo "y" | terragrunt run-all apply -parallelism=5 -lock=false
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
