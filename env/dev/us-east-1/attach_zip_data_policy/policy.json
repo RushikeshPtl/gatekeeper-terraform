@@ -21,7 +21,7 @@
                 "dynamodb:Update*",
                 "dynamodb:PutItem"
             ],
-            "Resource": "*",
+            "Resource": "${DynamoDbArn}",
             "Effect": "Allow"
         },
         {

@@ -8,3 +8,9 @@ variable "file_path" {
   type        = string
 }
 
+variable "template_vars" {
+  description = "Variables for policy json"
+  type        = map(string)
+  default     = {}
+}
+

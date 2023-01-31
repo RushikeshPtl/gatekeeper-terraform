@@ -106,3 +106,9 @@ variable "include_vpc" {
   default     = false
 }
 
+variable "event_source_arns" {
+  description = "List of event source ARNs"
+  type        = list(string)
+  default     = []
+}
+
