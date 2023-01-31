@@ -108,3 +108,11 @@ resource "aws_lambda_permission" "lambda_permission" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${var.apigateway_execution_arn}/*/*"
 }
+
+resource "aws_lambda_event_source_mapping" "example" {
+  count             = length(var.event_source_arns)
+  event_source_arn  = var.event_source_arns[count.index]
+  function_name     = aws_lambda_function.lambda_function.arn
+  batch_size        = 1
+  starting_position = "LATEST"
+}

@@ -17,7 +17,7 @@
                 "dynamodb:GetShardIterator",
                 "dynamodb:ListStreams"
             ],
-            "Resource": "arn:aws:dynamodb:us-east-1:940299927090:table/ZipCodes/stream/2022-12-28T07:41:01.757",
+            "Resource": "${DynamoDbStreamArn}",
             "Effect": "Allow"
         },
         {
