@@ -10,3 +10,7 @@ inputs = {
     username = "${local.env_vars.locals.env}-cache-user"
     usergroup = "${local.env_vars.locals.env}-cache-user-group"
 }
+
+include {
+  path = find_in_parent_folders()
+}

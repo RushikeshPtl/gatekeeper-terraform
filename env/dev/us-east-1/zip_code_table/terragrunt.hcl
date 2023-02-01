@@ -12,3 +12,7 @@ inputs = {
     read_capacity   = 2000
     write_capacity  = 2000
 }
+
+include {
+  path = find_in_parent_folders()
+}
