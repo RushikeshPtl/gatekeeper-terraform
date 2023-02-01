@@ -47,9 +47,20 @@ dependency "get_secrets" {
   }
 }
 
+dependency "zip_codes_table" {
+  config_path = "../../zip_code_table"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    arn  = "1234567890"
+    stream_arn  = "1234567890_arn"
+  }
+}
+
 inputs = {
   lambda_relative_path = "/../../"
-  function_name        = "stream_zip_code_to_cache"
+  function_name        = "stream_zip_codes"
   module_name          = "common_functions"
   handler              = "app.lambda_handler"
   runtime              = "python3.9"
@@ -67,6 +78,9 @@ inputs = {
   layers = [
     dependency.shared_layer.outputs.layer_arn,
     dependency.packages_layer.outputs.layer_arn
+  ]
+  event_source_arns = [
+    dependency.zip_codes_table.outputs.stream_arn
   ]
 }
 
