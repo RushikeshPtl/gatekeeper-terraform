@@ -4,7 +4,7 @@ data "aws_secretsmanager_random_password" "elasticache_password" {
 }
 
 resource "aws_secretsmanager_secret" "elasticache_secret" {
-    name = "elasticache-secret"
+    name = "${var.username}-elasticache-secret"
 }
 
 resource "aws_secretsmanager_secret_version" "elasticache_secret_version" {
