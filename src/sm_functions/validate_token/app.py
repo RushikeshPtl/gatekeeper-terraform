@@ -25,7 +25,7 @@ def lambda_handler(event, context):
             "msg" : "Warm up triggered.............."
         }
     generic_json = event["generic_json"]
-    referral_type = event["original_request"]["referral_type"]
+    referral_type = event["original_request"]["referral_provider"]
     ref_token = event["original_request"]["token"]
     client = boto3.client("lambda")
     response = client.invoke(
@@ -41,13 +41,14 @@ def lambda_handler(event, context):
             "error": payload["error"]
         }
     else:
-        org_id = json.loads(payload["body"])["org_id"]
+        org_id = json.loads(payload["body"]).get("org_id", None)
         validation_check = event["validation_checks"]
         request_id = event.get("request_id", None)
         if not org_id:
             validation_check["token"] = ["Invalid token"]
         return {
             "status" : 200,
+            "msg" : "Token validation completed",
             "validation_checks" : validation_check,
             "original_request" : event["original_request"],
             "generic_json" : generic_json,
