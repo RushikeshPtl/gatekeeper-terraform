@@ -3,7 +3,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../..//modules/lambda"
+  source = "../../../../..//modules/lambda_with_dependency"
 }
 
 
