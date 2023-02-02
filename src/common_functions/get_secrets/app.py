@@ -3,7 +3,7 @@ from botocore.exceptions import ClientError
 import json
 import os
 from aws_lambda_powertools import Logger
-from shared import GateKeeperException
+# from shared import GateKeeperException
 
 
 logger = Logger()
