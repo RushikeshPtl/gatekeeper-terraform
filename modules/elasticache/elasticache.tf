@@ -4,7 +4,7 @@ data "aws_secretsmanager_random_password" "elasticache_password" {
 }
 
 resource "aws_secretsmanager_secret" "elasticache_secret" {
-  name = replace("${var.env}-${var.project_name}-elasticache-secret", "_", "-")
+  name_prefix = replace("${var.env}-${var.project_name}-elasticache-secret", "_", "-")
 }
 
 resource "aws_secretsmanager_secret_version" "elasticache_secret_version" {
@@ -26,7 +26,7 @@ resource "aws_elasticache_user" "elasticache_user" {
 resource "aws_elasticache_user_group" "elasticache_user_group" {
   engine        = "REDIS"
   user_group_id = var.user_group_id
-  user_ids      = [aws_elasticache_user.elasticache_user.user_id]
+  user_ids      = ["default", aws_elasticache_user.elasticache_user.user_id]
 }
 
 resource "aws_elasticache_subnet_group" "elasticache_subnet" {
