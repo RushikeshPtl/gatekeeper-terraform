@@ -97,10 +97,10 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN"          = dependency.get_secrets.outputs.invoke_arn,
-    "FIND_RELATIONSHIP_ID_ARN"= dependency.find_relationship_id.outputs.invoke_arn
-    "GET_AMD_CODES_ARN"       = dependency.get_amd_codes.outputs.invoke_arn,
-    "FIND_FIN_CLASS_ID_ARN"   = dependency.lookup_fin_class.outputs.invoke_arn,
+    "GET_SECRET_ARN"          = dependency.get_secrets.outputs.resource_arn,
+    "FIND_RELATIONSHIP_ID_ARN"= dependency.find_relationship_id.outputs.resource_arn
+    "GET_AMD_CODES_ARN"       = dependency.get_amd_codes.outputs.resource_arn,
+    "FIND_FIN_CLASS_ID_ARN"   = dependency.lookup_fin_class.outputs.resource_arn,
     "PROFILE_ID"              = "prof2871"
   }
   layers = [

@@ -101,9 +101,9 @@ inputs = {
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/LambdaAddPermissionPolicy"
     ]
     environment_variables = {
-        "GET_SECRET_ARN"                    = dependency.get_secrets.outputs.invoke_arn
-        "SEND_EMAIL_ARN"                    = dependency.send_email.outputs.invoke_arn
-        "EXPIRE_PASSWORD_RESET_TOKEN_ARN"   = dependency.expire_reset_password_token.outputs.invoke_arn
+        "GET_SECRET_ARN"                    = dependency.get_secrets.outputs.resource_arn
+        "SEND_EMAIL_ARN"                    = dependency.send_email.outputs.resource_arn
+        "EXPIRE_PASSWORD_RESET_TOKEN_ARN"   = dependency.expire_reset_password_token.outputs.resource_arn
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,

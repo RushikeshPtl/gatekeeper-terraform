@@ -76,7 +76,7 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN"             = dependency.get_secrets.outputs.invoke_arn
+    "GET_SECRET_ARN"             = dependency.get_secrets.outputs.resource_arn
   }
   apigateway_id            = dependency.apigateway.outputs.api_id
   apigateway_execution_arn = dependency.apigateway.outputs.execution_arn

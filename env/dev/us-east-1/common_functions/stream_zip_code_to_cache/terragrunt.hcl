@@ -73,7 +73,7 @@ inputs = {
   environment_variables = {
     "REDIS_HOST"        =  ""
     "REDIS_PORT"        =  6379
-    "GET_SECRET_ARN"    = dependency.get_secrets.outputs.invoke_arn
+    "GET_SECRET_ARN"    = dependency.get_secrets.outputs.resource_arn
   }
   layers = [
     dependency.shared_layer.outputs.layer_arn,

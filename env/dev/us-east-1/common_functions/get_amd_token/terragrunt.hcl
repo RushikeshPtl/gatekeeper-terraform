@@ -67,7 +67,7 @@ inputs = {
   ]
   environment_variables = {
     "AMD_SECRET_NAME" = "md/token/${local.env_vars.locals.env}",
-    "GET_SECRET_ARN"  = dependency.get_secrets.outputs.invoke_arn,
+    "GET_SECRET_ARN"  = dependency.get_secrets.outputs.resource_arn,
   }
   layers = [
     dependency.shared_layer.outputs.layer_arn,

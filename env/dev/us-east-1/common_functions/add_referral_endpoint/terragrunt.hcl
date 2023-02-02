@@ -67,7 +67,7 @@ inputs = {
     "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess",
   ]
   environment_variables = {
-    "GET_SECRET_ARN"             = dependency.get_secrets.outputs.invoke_arn,
+    "GET_SECRET_ARN"             = dependency.get_secrets.outputs.resource_arn,
     "VALIDATE_REFERRAL_SM_ARN"   = dependency.validate_referral_state_machine.outputs.arn
   }
   apigateway_id            = dependency.apigateway.outputs.api_id

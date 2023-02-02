@@ -122,6 +122,7 @@ inputs = {
     name                   = "ValidateReferral"
     policy_file_path       = local.policy_file_path
     role_file_path         = local.role_policy_file_path
+    type                   = "EXPRESS"
     template_file_path     = local.definition_file_path
     template_vars          = {
         "ConvertUFTReferralArn"     = "${dependency.convert.outputs.resource_arn}",

@@ -80,7 +80,7 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/Lambda-S3-Access",
   ]
   environment_variables = {
-    "UPDATE_S3_ARN"  = dependency.update_s3.outputs.invoke_arn
+    "UPDATE_S3_ARN"  = dependency.update_s3.outputs.resource_arn
   }
   layers = [
     dependency.shared_layer.outputs.layer_arn,

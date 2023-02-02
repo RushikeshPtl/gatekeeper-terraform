@@ -78,7 +78,7 @@ inputs = {
         "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
     ]
     environment_variables = {
-        "GET_SECRET_ARN"         = dependency.get_secrets.outputs.invoke_arn
+        "GET_SECRET_ARN"         = dependency.get_secrets.outputs.resource_arn
         "EC_CLUSTER_ENDPOINT"    = ""
     }
     layers = [

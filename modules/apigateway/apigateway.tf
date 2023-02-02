@@ -2,10 +2,10 @@
 resource "aws_apigatewayv2_api" "apigateway" {
   name          = replace("${var.env}-${var.project_name}-${var.name}-gw", "_", "-")
   protocol_type = "HTTP"
-  cors_configuration = {
-    allow_headers = ["Authorization", "Content-Type""X-Amz-Date", "X-Amz-Security-Token", "X-Api-Key"]
+  cors_configuration {
+    allow_headers = ["Authorization", "Content-Type", "X-Amz-Date", "X-Amz-Security-Token", "X-Api-Key"]
     allow_methods = ["OPTIONS", "HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"]
-    allow_origin  = "*"
+    allow_origins  = ["*"]
   }
 }
 
