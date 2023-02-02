@@ -60,6 +60,16 @@ dependency "send_email" {
   }
 }
 
+dependency "add_referral_to_amd" {
+  config_path = "../../add_referral_state_mchine"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    arn        = "test"
+  }
+}
+
 inputs = {
   lambda_relative_path = "/../../"
   function_name        = "save_referral_request"
@@ -81,7 +91,7 @@ inputs = {
   environment_variables = {
     "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
     "SEND_EMAIL_ARN" = dependency.send_email.outputs.invoke_arn,
-    "ADD_AMD_REFERRAL" = ""
+    "ADD_AMD_REFERRAL" = dependency.add_referral_endpoint.outputs.arn
   }
   layers = [
     dependency.packages_layer.outputs.layer_arn,
