@@ -41,7 +41,7 @@ resource "aws_elasticache_replication_group" "elasticache_replication_group" {
   automatic_failover_enabled = true
   engine                     = "REDIS"
   engine_version             = "6.2"
-  replication_group_id       = "elasticache-rep-group"
+  replication_group_id       = replace("${var.env}-${var.project_name}-elasticache-rep-group", "_", "-")
   node_type                  = "cache.t3.small"
   replicas_per_node_group    = 2
   parameter_group_name       = "default.redis6.x"
