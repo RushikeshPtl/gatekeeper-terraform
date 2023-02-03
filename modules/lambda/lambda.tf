@@ -9,6 +9,7 @@ locals {
 
 # Create an archive form the Lambda source code,
 # filtering out unneeded files.
+
 data "archive_file" "lambda_source_package" {
   type        = "zip"
   source_file = local.lambda_source_path
