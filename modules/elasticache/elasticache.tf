@@ -21,6 +21,11 @@ resource "aws_elasticache_user" "elasticache_user" {
   access_string = "on ~* +@all"
   engine        = "REDIS"
   passwords     = [data.aws_secretsmanager_random_password.elasticache_password.random_password]
+
+  timeouts {
+    create = "30m"
+    delete = "30m"
+  }
 }
 
 resource "aws_elasticache_user_group" "elasticache_user_group" {

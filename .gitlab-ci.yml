@@ -25,15 +25,11 @@ dev_plan:
   dependencies:
     - dev_validate
   before_script:
-    - apk add python3 py-pip
     - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
-    - pip3 install -r ./src/packages/requirements.txt -t ./src/packages/python
-    - rm -r ./src/packages/python/*dist-info
-    - rm -r ./src/packages/python/__pycache__
   script:
     - cd ./env/dev/us-east-1
-    - terragrunt run-all plan -parallelism=6 -lock=false
+    - terragrunt run-all plan -lock=false
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
 
@@ -51,6 +47,6 @@ dev_apply:
     - rm -r ./src/packages/python/__pycache__
   script:
     - cd ./env/dev/us-east-1
-    - echo "y" | terragrunt run-all apply -parallelism=6 -lock=false
+    - echo "y" | terragrunt run-all apply -lock=false
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
