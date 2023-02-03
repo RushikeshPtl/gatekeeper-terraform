@@ -1,15 +1,20 @@
 variable "user_id" {
-    description = "ID for elasticache user"
-    type        = string
+  description = "ID for elasticache user"
+  type        = string
 }
 variable "user_name" {
-    description = "Name for elasticache user"
-    type        = string
+  description = "Name for elasticache user"
+  type        = string
+}
+
+variable "password" {
+  description = "Password for elasticache user"
+  type        = string
 }
 
 variable "user_group_id" {
-    description = "Name of elasticache user group"
-    type        = string
+  description = "Name of elasticache user group"
+  type        = string
 }
 
 variable "subnet_ids" {

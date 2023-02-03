@@ -1,7 +1,3 @@
-data "aws_secretsmanager_random_password" "elasticache_password" {
-  password_length     = 30
-  exclude_punctuation = true
-}
 
 resource "aws_secretsmanager_secret" "elasticache_secret" {
   name_prefix = replace("${var.env}-${var.project_name}-elasticache-secret", "_", "-")
@@ -11,7 +7,7 @@ resource "aws_secretsmanager_secret_version" "elasticache_secret_version" {
   secret_id = aws_secretsmanager_secret.elasticache_secret.id
   secret_string = jsonencode({
     "username" : var.user_name,
-    "password" : data.aws_secretsmanager_random_password.elasticache_password.random_password
+    "password" : var.password
   })
 }
 
@@ -20,7 +16,7 @@ resource "aws_elasticache_user" "elasticache_user" {
   user_name     = var.user_name
   access_string = "on ~* +@all"
   engine        = "REDIS"
-  passwords     = [data.aws_secretsmanager_random_password.elasticache_password.random_password]
+  passwords     = [var.password]
 }
 
 resource "aws_elasticache_user_group" "elasticache_user_group" {
@@ -39,7 +35,7 @@ resource "aws_elasticache_replication_group" "elasticache_replication_group" {
   description                = "Cache for properties"
   at_rest_encryption_enabled = true
   automatic_failover_enabled = true
-  engine                     = "REDIS"
+  engine                     = "redis"
   engine_version             = "6.2"
   replication_group_id       = replace("${var.env}-${var.project_name}-elasticache-rep-group", "_", "-")
   node_type                  = "cache.t3.small"

@@ -9,6 +9,7 @@ terraform {
 inputs = {
   user_id            = "devcacheuserid"
   user_name          = "devcacheuser"
+  password           = "jTq64kQTbGVQK4SDZJP4EFHD6LzIIY"
   user_group_id      = "devcacheusergroup"
   subnet_ids         = local.env_vars.locals.subnet_ids
   security_group_ids = local.env_vars.locals.security_group_ids
