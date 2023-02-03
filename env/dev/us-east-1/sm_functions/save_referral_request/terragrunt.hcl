@@ -89,9 +89,9 @@ inputs = {
     "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
   ]
   environment_variables = {
-    "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn,
-    "SEND_EMAIL_ARN" = dependency.send_email.outputs.invoke_arn,
-    "ADD_AMD_REFERRAL" = dependency.add_referral_endpoint.outputs.arn
+    "GET_SECRET_ARN" = dependency.get_secrets.outputs.resource_arn,
+    "SEND_EMAIL_ARN" = dependency.send_email.outputs.resource_arn,
+    "ADD_AMD_REFERRAL" = dependency.add_referral_to_amd.outputs.arn
   }
   layers = [
     dependency.packages_layer.outputs.layer_arn,

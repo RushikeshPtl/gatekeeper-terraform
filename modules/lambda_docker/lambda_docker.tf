@@ -3,29 +3,68 @@
 locals {
   # Relative paths change if this configuration is
   # included as a module from Terragrunt.
-  lambda_source_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/app.py"
-  lambda_output_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/${var.function_name}.zip"
+    lambda_source_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}"
+    lambda_output_path = "${path.module}${var.lambda_relative_path}src/${var.module_name}/${var.function_name}/${var.function_name}.zip"
+    prefix = "git"
+    region = "us-east-1"
+    account_id          = var.account_id
+    ecr_repository_name = "env-demo-lambda-container"
+    ecr_image_tag       = "latest"
 }
 
 # Create an archive form the Lambda source code,
 # filtering out unneeded files.
 
-data "archive_file" "lambda_source_package" {
-  type        = "zip"
-  source_file = local.lambda_source_path
-  output_path = local.lambda_output_path
+# data "archive_file" "lambda_source_package" {
+#   type        = "zip"
+#   source_file = local.lambda_source_path
+#   output_path = local.lambda_output_path
+# }
+ 
+resource "aws_ecr_repository" "repo" {
+ name = local.ecr_repository_name
+}
+ 
+resource "null_resource" "ecr_image" {
+  triggers = {
+    python_file = md5(file("${local.lambda_source_path}/app.py"))
+    docker_file = md5(file("${local.lambda_source_path}/Dockerfile"))
+  }
+ 
+  provisioner "local-exec" {
+    command = <<EOF
+            aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${local.region}.amazonaws.com
+            docker build -t ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag} .
+            docker push ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag}
+        EOF
+    interpreter = ["pwsh", "-Command"]
+    working_dir = "${local.lambda_source_path}"
+  }
+}
+ 
+data "aws_ecr_image" "lambda_image" {
+ depends_on = [
+   null_resource.ecr_image
+ ]
+ repository_name = local.ecr_repository_name
+ image_tag       = local.ecr_image_tag
 }
 
 resource "aws_lambda_function" "lambda_function" {
   function_name    = replace("${var.env}-${var.project_name}-${var.function_name}", "_", "-")
   runtime          = var.runtime
   handler          = var.handler
-  filename         = data.archive_file.lambda_source_package.output_path
-  source_code_hash = filebase64sha256(data.archive_file.lambda_source_package.output_path)
+  # filename         = data.archive_file.lambda_source_package.output_path
+  # source_code_hash = filebase64sha256(data.archive_file.lambda_source_package.output_path)
   role             = aws_iam_role.function_role.arn
   layers           = var.layers
   timeout          = var.timeout
   memory_size      = var.memory_size
+  depends_on = [
+    null_resource.ecr_image
+  ]
+  image_uri = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  package_type = "Image"
 
   environment {
     variables = var.environment_variables
