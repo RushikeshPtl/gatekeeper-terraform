@@ -40,6 +40,17 @@ dependency "get_secrets" {
   }
 }
 
+dependency "get_user_from_session" {
+  config_path = "../../dashboard_functions/get_user_from_session"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    invoke_arn    = "test"
+    function_name = "test"
+  }
+}
+
 dependency "validate_referral_state_machine" {
     config_path = "../../validate_referral_state_machine"
 
@@ -69,6 +80,7 @@ inputs = {
   environment_variables = {
     "GET_SECRET_ARN"             = dependency.get_secrets.outputs.resource_arn,
     "VALIDATE_REFERRAL_SM_ARN"   = dependency.validate_referral_state_machine.outputs.arn
+    "GET_USER_ARN"               = dependency.get_user_from_session.outputs.resource_arn
   }
   apigateway_id            = dependency.apigateway.outputs.api_id
   apigateway_execution_arn = dependency.apigateway.outputs.execution_arn
