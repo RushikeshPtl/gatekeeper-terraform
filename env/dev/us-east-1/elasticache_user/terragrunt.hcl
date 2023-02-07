@@ -3,12 +3,11 @@ locals {
 }
 
 terraform {
-  source = "../../../..//modules/elasticache"
+  source = "../../../..//modules/elasticache_user"
 }
 
 inputs = {
-    username = "${local.env_vars.locals.env}-cache-user"
-    usergroup = "${local.env_vars.locals.env}-cache-user-group"
+    username               = "${local.env_vars.locals.env}-gatekeeper-user"
 }
 
 include {

@@ -94,7 +94,8 @@ inputs = {
         "GET_USER_ARN"   = dependency.get_user_from_session.outputs.resource_arn
         "ENVIRONMENT"    = local.env_vars.locals.env
         "STAGE_S3_BUCKET"= "hh-gatekeeper-stage-identity-pool"
-        "PROD_S3_BUCKET" = "hh-gatekeeper-production-identity-pool"     
+        "PROD_S3_BUCKET" = "hh-gatekeeper-production-identity-pool"
+        "ENVIRONMENT"    = "${local.env_vars.locals.env}"
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,

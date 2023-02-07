@@ -134,7 +134,7 @@ def lambda_handler(event, context):
                     )
 
                     s3_client = boto3.client('s3')
-                    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "DEV" else os.environ["PROD_S3_BUCKET"]
+                    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "dev" else os.environ["PROD_S3_BUCKET"]
 
                     if file:
                         logo=convertBaseToImage(file)

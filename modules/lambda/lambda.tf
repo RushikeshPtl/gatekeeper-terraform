@@ -31,14 +31,14 @@ resource "aws_lambda_function" "lambda_function" {
     variables = var.environment_variables
   }
   vpc_config {
-       subnet_ids         = var.include_vpc ? var.subnet_ids : []
-       security_group_ids = var.include_vpc ? var.security_group_ids : []
+    subnet_ids         = var.include_vpc ? var.subnet_ids : []
+    security_group_ids = var.include_vpc ? var.security_group_ids : []
   }
 }
 
 resource "aws_cloudwatch_event_rule" "schedule" {
   count               = var.warmup_enabled ? 1 : 0
-  name                = "schedule"
+  name                = replace("${var.function_name}WarmUpSchedule", "_", "")
   description         = "Schedule for Lambda Function"
   schedule_expression = var.schedule
 }
@@ -46,7 +46,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
 resource "aws_cloudwatch_event_target" "schedule_lambda" {
   count     = var.warmup_enabled ? 1 : 0
   rule      = aws_cloudwatch_event_rule.schedule[count.index].name
-  target_id = "processing_lambda"
+  target_id = "${aws_lambda_function.lambda_function.function_name}-event-target"
   arn       = aws_lambda_function.lambda_function.arn
 }
 
@@ -61,8 +61,8 @@ resource "aws_lambda_permission" "allow_events_bridge_to_run_lambda" {
 
 data "aws_iam_policy_document" "lambda_trust_policy" {
   statement {
-    actions       = ["sts:AssumeRole"]
-    effect        = "Allow"
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]

@@ -41,9 +41,10 @@ inputs = {
   env                  = "${local.env_vars.locals.env}"
   project_name         = "${local.env_vars.locals.project_name}"
   environment_variables = {
-    "STAGE_BUCKET_NAME"     = "hh-stage-gatekeeper-utilities",
-    "PROD_BUCKET_NAME"      = "hh-prod-gatekeeper-utilities",
+    "STAGE_BUCKET_NAME"     = "hh-stage-gatekeeper-utilities"
+    "PROD_BUCKET_NAME"      = "hh-prod-gatekeeper-utilities"
     "KEY"                   = "swagger.yaml"
+    "ENVIRONMENT"           = "${local.env_vars.locals.env}"
   }
   apigateway_id            = dependency.apigateway.outputs.api_id
   apigateway_execution_arn = dependency.apigateway.outputs.execution_arn

@@ -35,6 +35,7 @@ inputs = {
     environment_variables = {
         "STAGE_S3_BUCKET"   = "hh-gatekeeper-stage-identity-pool"
         "PROD_S3_BUCKET"    = "hh-gatekeeper-production-identity-pool"
+        "ENVIRONMENT"       = "${local.env_vars.locals.env}"
     }
 }
 
