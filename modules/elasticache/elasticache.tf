@@ -4,9 +4,9 @@ resource "aws_elasticache_user_group" "elasticache_user_group" {
     user_ids      = ["default", "${var.user_id}"]
 }
 resource "aws_elasticache_subnet_group" "elasticache_subnet" {
-    name        = "elasticache-subnet"
-    description = "Elasticache subnet group"
-    subnet_ids  = var.subnet_ids
+  name        = replace("${var.env}-${var.project_name}-elasticache-subnet", "_", "-")
+  description = "Elasticache subnet group"
+  subnet_ids  = var.subnet_ids
 }
 
 resource "aws_elasticache_replication_group" "elasticache_replication_group" {
