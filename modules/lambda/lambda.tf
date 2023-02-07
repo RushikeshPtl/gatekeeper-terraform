@@ -38,7 +38,7 @@ resource "aws_lambda_function" "lambda_function" {
 
 resource "aws_cloudwatch_event_rule" "schedule" {
   count               = var.warmup_enabled ? 1 : 0
-  name                = "schedule"
+  name                = replace("${var.function_name}WarmUpSchedule", "_", "")
   description         = "Schedule for Lambda Function"
   schedule_expression = var.schedule
 }

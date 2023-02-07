@@ -3,7 +3,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../..//modules/lambda_docker"
+  source = "../../../../..//modules/lambda_docker_image"
 }
 
 
@@ -108,10 +108,6 @@ inputs = {
     "UPDATE_S3_ARN"  = dependency.update_s3.outputs.resource_arn
     "SEND_EMAIL_ARN" = dependency.send_email.outputs.resource_arn
   }
-  layers = [
-    dependency.shared_layer.outputs.layer_arn,
-    dependency.packages_layer.outputs.layer_arn
-  ]
   apigateway_id            = dependency.apigateway.outputs.api_id
   apigateway_execution_arn = dependency.apigateway.outputs.execution_arn
   api_paths = [

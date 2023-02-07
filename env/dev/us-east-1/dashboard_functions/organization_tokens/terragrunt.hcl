@@ -106,7 +106,8 @@ inputs = {
         "ENVIRONMENT"    = local.env_vars.locals.env
         "STAGE_S3_BUCKET"= "hh-gatekeeper-stage-identity-pool"
         "PROD_S3_BUCKET" = "hh-gatekeeper-production-identity-pool"
-        "SEND_EMAIL_ARN" = dependency.send_email.outputs.resource_arn 
+        "SEND_EMAIL_ARN" = dependency.send_email.outputs.resource_arn
+        "ENVIRONMENT"    = "${local.env_vars.locals.env}"
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,

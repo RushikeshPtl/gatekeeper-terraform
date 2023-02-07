@@ -13,7 +13,7 @@ response_headers = {
     }
 
 def lambda_handler(event, context):
-    bucket = os.environ["STAGE_BUCKET_NAME"] if os.environ["ENVIRONMENT"] == "DEV" else os.environ["PROD_BUCKET_NAME"]
+    bucket = os.environ["STAGE_BUCKET_NAME"] if os.environ["ENVIRONMENT"] == "dev" else os.environ["PROD_BUCKET_NAME"]
     key = os.environ["KEY"]
 
     s3 = boto3.client('s3')

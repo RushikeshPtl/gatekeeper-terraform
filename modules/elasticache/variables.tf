@@ -1,13 +1,3 @@
-variable "username" {
-    description = "Name for elasticache user"
-    type        = string
-}
-
-variable "usergroup" {
-    description = "Name of elasticache user group"
-    type        = string
-}
-
 variable "subnet_ids" {
   description = "VPC subnet ids"
   type        = list(string)
@@ -18,4 +8,19 @@ variable "security_group_ids" {
   description = "VPC Security Group"
   type        = list(string)
   default     = ["sg-081946533c970c401"]
+}
+
+variable "user_id" {
+  description = "User ID"
+  type        = string
+}
+
+variable "replication_group_name" {
+  description = "Name of elasticache replication group"
+  type        = string
+}
+
+variable "usergroup" {
+  description = "Name of user group"
+  type        = string
 }

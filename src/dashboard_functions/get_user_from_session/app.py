@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     token_type=event.get("type","")
     client = boto3.client('s3')
     s3_key="first_login_json" if token_type == "first_login_token" else "session_json"
-    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "DEV" else os.environ["PROD_S3_BUCKET"]
+    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "dev" else os.environ["PROD_S3_BUCKET"]
     try:
         response = client.get_object(
                             Bucket=bucket,
