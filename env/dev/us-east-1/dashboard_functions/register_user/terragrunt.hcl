@@ -80,6 +80,16 @@ dependency "update_s3" {
     }
 }
 
+dependency "update_user_permission" {
+    config_path = "../update_user_permission"
+    mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
+    mock_outputs = {
+        invoke_arn    = "test"
+        function_name = "test"
+    }
+}
+
 dependency "apigateway" {
     config_path = "../../apigateway"
 
@@ -110,11 +120,11 @@ inputs = {
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/EC2Access",
     ]
     environment_variables = {
-        "GET_SECRET_ARN"                = dependency.get_secrets.outputs.invoke_arn
-        "GET_USER_ARN"                  = dependency.get_user_from_session.outputs.invoke_arn   
-        "UPDATE_S3_ARN"                 = dependency.update_s3.outputs.invoke_arn
-        "SEND_EMAIL_ARN"                = dependency.send_email.outputs.invoke_arn
-        "UPDATE_USER_PERMISSION_ARN"    = "" 
+        "GET_SECRET_ARN"                = dependency.get_secrets.outputs.resource_arn
+        "GET_USER_ARN"                  = dependency.get_user_from_session.outputs.resource_arn   
+        "UPDATE_S3_ARN"                 = dependency.update_s3.outputs.resource_arn
+        "SEND_EMAIL_ARN"                = dependency.send_email.outputs.resource_arn
+        "UPDATE_USER_PERMISSION_ARN"    = dependency.update_user_permission.outputs.resource_arn
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,

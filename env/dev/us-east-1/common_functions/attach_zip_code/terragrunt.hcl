@@ -52,6 +52,7 @@ inputs = {
     "STAGE_BUCKET_NAME" =  "hh-stage-gatekeeper-utilities"
     "PROD_BUCKET_NAME"  =  "hh-prod-gatekeeper-utilities"
     "KEY"               = "zipcodes.json"
+    "ENVIRONMENT"       = "${local.env_vars.locals.env}"
   }
   layers = [
     dependency.shared_layer.outputs.layer_arn,

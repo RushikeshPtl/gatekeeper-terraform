@@ -9,6 +9,7 @@ locals {
 
 # Create an archive form the Lambda source code,
 # filtering out unneeded files.
+
 data "archive_file" "lambda_source_package" {
   type        = "zip"
   source_file = local.lambda_source_path
@@ -37,7 +38,7 @@ resource "aws_lambda_function" "lambda_function" {
 
 resource "aws_cloudwatch_event_rule" "schedule" {
   count               = var.warmup_enabled ? 1 : 0
-  name                = "${aws_lambda_function.lambda_function.function_name}-event-rule"
+  name                = replace("${var.function_name}WarmUpSchedule", "_", "")
   description         = "Schedule for Lambda Function"
   schedule_expression = var.schedule
 }

@@ -76,7 +76,7 @@ def authenticate(token):
 def lambda_handler(event, context):
     if is_json(event):
         if not isinstance(event, dict):
-            event - json.loads(event)
+            event = json.loads(event)
         if "source" in event and event["source"] == "aws.events":
             print("Warm up triggered..............")
             return {

@@ -97,10 +97,10 @@ inputs = {
     "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets"
   ]
   environment_variables = {
-    "GET_SECRET_ARN"            = dependency.get_secrets.outputs.invoke_arn,
-    "GET_REF_STATUS_ARN"        = dependency.get_referral_status.outputs.invoke_arn
-    "GET_AMD_CODES_ARN"         = dependency.get_amd_codes.outputs.invoke_arn,
-    "GET_REF_PROVIDER_ARN"      = dependency.lookup_ref_provider.outputs.invoke_arn,
+    "GET_SECRET_ARN"            = dependency.get_secrets.outputs.resource_arn,
+    "GET_REF_STATUS_ARN"        = dependency.get_referral_status.outputs.resource_arn
+    "GET_AMD_CODES_ARN"         = dependency.get_amd_codes.outputs.resource_arn,
+    "GET_REF_PROVIDER_ARN"      = dependency.lookup_ref_provider.outputs.resource_arn,
     "TO_PROVIDER_ID"            = "rprov382227"
   }
   layers = [

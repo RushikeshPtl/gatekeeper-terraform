@@ -101,12 +101,13 @@ inputs = {
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/Lambda-S3-Access"
     ]
     environment_variables = {
-        "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn
-        "GET_USER_ARN"   = dependency.get_user_from_session.outputs.invoke_arn   
+        "GET_SECRET_ARN" = dependency.get_secrets.outputs.resource_arn
+        "GET_USER_ARN"   = dependency.get_user_from_session.outputs.resource_arn   
         "ENVIRONMENT"    = local.env_vars.locals.env
         "STAGE_S3_BUCKET"= "hh-gatekeeper-stage-identity-pool"
         "PROD_S3_BUCKET" = "hh-gatekeeper-production-identity-pool"
-        "SEND_EMAIL_ARN" = dependency.send_email.outputs.invoke_arn 
+        "SEND_EMAIL_ARN" = dependency.send_email.outputs.resource_arn
+        "ENVIRONMENT"    = "${local.env_vars.locals.env}"
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,

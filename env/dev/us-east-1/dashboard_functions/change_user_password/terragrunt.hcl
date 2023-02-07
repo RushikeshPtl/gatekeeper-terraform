@@ -3,7 +3,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../..//modules/lambda"
+  source = "../../../../..//modules/lambda_docker_image"
 }
 
 
@@ -84,6 +84,7 @@ inputs = {
     schedule             = "rate(5 minutes)"
     env                  = "${local.env_vars.locals.env}"
     project_name         = "${local.env_vars.locals.project_name}"
+    account_id           = "${dependency.caller_identity.outputs.account_id}"
     policies = [
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/InvokeGetSecrets",
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/RdsReadWriteAccess",
@@ -91,13 +92,9 @@ inputs = {
         "arn:aws:iam::${dependency.caller_identity.outputs.account_id}:policy/Lambda-S3-Access"
     ]
     environment_variables = {
-        "GET_SECRET_ARN" = dependency.get_secrets.outputs.invoke_arn
-        "GET_USER_ARN"   = dependency.get_user_from_session.outputs.invoke_arn   
+        "GET_SECRET_ARN" = dependency.get_secrets.outputs.resource_arn
+        "GET_USER_ARN"   = dependency.get_user_from_session.outputs.resource_arn   
     }
-    layers = [
-        dependency.shared_layer.outputs.layer_arn,
-        dependency.packages_layer.outputs.layer_arn
-    ]
     apigateway_id            = dependency.apigateway.outputs.api_id
     apigateway_execution_arn = dependency.apigateway.outputs.execution_arn
     api_paths = [

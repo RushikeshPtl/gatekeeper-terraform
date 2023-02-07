@@ -58,6 +58,16 @@ dependency "zip_codes_table" {
   }
 }
 
+dependency "elasticache" {
+  config_path = "../../elasticache_replication_group"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    elasticache_endpoint_address  = "1234567890"
+  }
+}
+
 inputs = {
   lambda_relative_path = "/../../"
   function_name        = "stream_zip_codes"
@@ -71,9 +81,9 @@ inputs = {
     dependency.custom_policy.outputs.arn
   ]
   environment_variables = {
-    "REDIS_HOST"        =  ""
+    "REDIS_HOST"        =  dependency.elasticache.outputs.elasticache_endpoint_address
     "REDIS_PORT"        =  6379
-    "GET_SECRET_ARN"    = dependency.get_secrets.outputs.invoke_arn
+    "GET_SECRET_ARN"    = dependency.get_secrets.outputs.resource_arn
   }
   layers = [
     dependency.shared_layer.outputs.layer_arn,

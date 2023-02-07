@@ -70,15 +70,19 @@ def get_token(event):
     return event["queryStringParameters"].get("token")
 
 def getOrgIdentifier(event):
-    if event["queryStringParameters"] and event["queryStringParameters"]["org_abbr"]:
-        field = 'abbr'
-        value = event["queryStringParameters"]["org_abbr"]
-    elif event["queryStringParameters"] and event["queryStringParameters"]["subdomain"]:
-        field = 'subdomain'
-        value = event["queryStringParameters"]["subdomain"]
+    params = event.get("queryStringParameters", None)
+    if params:
+        if "org_abbr" in params and params["org_abbr"]:
+            field = 'abbr'
+            value = event["queryStringParameters"]["org_abbr"]
+        elif "subdomain" in params and params["subdomain"]:
+            field = 'subdomain'
+            value = event["queryStringParameters"]["subdomain"]
+        else:
+            raise ApiError(400, f"Invalid Parameters")
+        return field, value
     else:
         raise ApiError(400, f"Invalid Parameters")
-    return field, value
 
 def create_table(name, meta, engine):
     tb = Table(
@@ -161,13 +165,13 @@ def get_organization_by_subdomain(subdomain, db_credentials):
             500, f'Faied to fetch organization hash subdomain {subdomain}: {e}')
 
 def get_organization_token(field, value, tk_type, token, db_credentials):
-    print(token)
+   
     engine, meta   = create_db_engine_and_meta(db_credentials)
     table          = create_table("organizations", meta, engine)
     token_table    = create_table(tk_type, meta, engine)
 
     try:
-
+        
         join = table.join(token_table, table.columns.id == token_table.columns.organization_id)
         select_stmt = select([
                 token_table.columns.id,
@@ -186,6 +190,9 @@ def get_organization_token(field, value, tk_type, token, db_credentials):
         connection = engine.connect()
         result = connection.execute(select_stmt).fetchone()
         connection.close()
+        
+        
+           
         if not result:
             return {}
         else:
@@ -217,9 +224,10 @@ def parse_query_parameters(event):
 
 
 def lambda_handler(event, context):
+   
     if is_json(event):
         if not isinstance(event, dict):
-            event - json.loads(event)
+            event = json.loads(event)
         if "source" in event and event["source"] == "aws.events":
             print("Warm up triggered..............")
             return {
@@ -229,31 +237,38 @@ def lambda_handler(event, context):
         print("Resource ----------------------> ", resource)
 
         try:
+           
             token_type, token = parse_query_parameters(event)
             db_credentials = get_database_secrets()
             field, value   = getOrgIdentifier(event)
             tk_type        = "documentation_tokens" if token_type == "documentation" else "referral_tokens"
+            
             db_organization = get_organization_token(field, value, tk_type, token, db_credentials)
-            org_id       = db_organization['organization_id']
-            archived     = db_organization['archived']
-            expiry_date  = db_organization['expiry_date']
-            expiry_date  = expiry_date.replace(tzinfo=pytz.utc) if expiry_date else None
-            present      = datetime.now()
-            present      = present.replace(tzinfo=pytz.utc)
+            
+            
+            if db_organization:
+                org_id       = db_organization['organization_id']
+                archived     = db_organization['archived']
+                expiry_date  = db_organization['expiry_date']
+                expiry_date  = expiry_date.replace(tzinfo=pytz.utc) if expiry_date else None
+                present      = datetime.now()
+                present      = present.replace(tzinfo=pytz.utc)
+               
+                if archived or (expiry_date and expiry_date < present):
+                    raise ApiError(400, 'Invalid token')
 
-            if archived or (expiry_date and expiry_date < present):
-                raise ApiError(400, 'Invalid token')
-
-            return {
-                "statusCode": 200,
-                "body": json.dumps({
+                return {
                     "statusCode": 200,
-                    "org_id": org_id,
-                    "token_type": token_type,
-                    "msg": "Token valid"
-                }),
-                "headers": response_headers,
-            }
+                    "body": json.dumps({
+                        "statusCode": 200,
+                        "org_id": org_id,
+                        "token_type": token_type,
+                        "msg": "Token valid"
+                    }),
+                    "headers": response_headers,
+                }
+            else:
+                raise ApiError(400, "Organization not found")
         except ApiError as e:
             logger.error(e)
             return {

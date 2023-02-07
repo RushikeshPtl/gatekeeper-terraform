@@ -86,7 +86,7 @@ def lambda_handler(event, context):
                 }
     if is_json(event):
         if not isinstance(event, dict):
-            event - json.loads(event)
+            event = json.loads(event)
         if "source" in event and event["source"] == "aws.events":
             print("Warm up triggered..............")
             return {
@@ -134,7 +134,7 @@ def lambda_handler(event, context):
                     )
 
                     s3_client = boto3.client('s3')
-                    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "DEV" else os.environ["PROD_S3_BUCKET"]
+                    bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "dev" else os.environ["PROD_S3_BUCKET"]
 
                     if file:
                         logo=convertBaseToImage(file)

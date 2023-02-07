@@ -47,7 +47,8 @@ inputs = {
   environment_variables = {
     "STAGE_S3_BUCKET"= "hh-gatekeeper-stage-identity-pool"
     "PROD_S3_BUCKET" = "hh-gatekeeper-production-identity-pool"
-    "UPDATE_S3_ARN"  = dependency.update_s3.outputs.invoke_arn
+    "UPDATE_S3_ARN"  = dependency.update_s3.outputs.resource_arn
+    "ENVIRONMENT"    = "${local.env_vars.locals.env}"
   }
 }
 

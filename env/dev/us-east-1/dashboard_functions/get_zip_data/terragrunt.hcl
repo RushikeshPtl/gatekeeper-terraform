@@ -50,6 +50,16 @@ dependency "get_secrets" {
     }
 }
 
+dependency "elasticache" {
+  config_path = "../../elasticache_replication_group"
+
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs = {
+    elasticache_endpoint_address  = "1234567890"
+  }
+}
+
 dependency "apigateway" {
     config_path = "../../apigateway"
 
@@ -78,8 +88,8 @@ inputs = {
         "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
     ]
     environment_variables = {
-        "GET_SECRET_ARN"         = dependency.get_secrets.outputs.invoke_arn
-        "EC_CLUSTER_ENDPOINT"    = ""
+        "GET_SECRET_ARN"         = dependency.get_secrets.outputs.resource_arn
+        "EC_CLUSTER_ENDPOINT"    = dependency.elasticache.outputs.elasticache_endpoint_address
     }
     layers = [
         dependency.shared_layer.outputs.layer_arn,
