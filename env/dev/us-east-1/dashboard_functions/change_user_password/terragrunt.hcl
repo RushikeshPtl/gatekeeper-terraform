@@ -3,7 +3,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../..//modules/lambda_docker_image"
+  source = "../../../../..//modules/lambda"
 }
 
 
@@ -95,6 +95,10 @@ inputs = {
         "GET_SECRET_ARN" = dependency.get_secrets.outputs.resource_arn
         "GET_USER_ARN"   = dependency.get_user_from_session.outputs.resource_arn   
     }
+    layers = [
+        dependency.shared_layer.outputs.layer_arn,
+        dependency.packages_layer.outputs.layer_arn
+    ]
     apigateway_id            = dependency.apigateway.outputs.api_id
     apigateway_execution_arn = dependency.apigateway.outputs.execution_arn
     api_paths = [

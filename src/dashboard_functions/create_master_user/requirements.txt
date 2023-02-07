@@ -1,9 +1,0 @@
-aws_lambda_powertools
-bcrypt
-boto3
-requests
-sqlalchemy==1.4.46
-aws-psycopg2
-psycopg2-binary
-redis
-pytz
