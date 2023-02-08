@@ -28,8 +28,8 @@ def lambda_handler(event, context):
             "msg" : "Warm up triggered.............."
         }
     request_id = event.get("request_id", None)
-    error_type = event.get("error_type", "")
-    error_details = event.get("error_details", "")
+    error_type = event.get("error_type", "Internal Error")
+    error_details = event["error_details"] if "error_details" in event else event.get("error_exception", "")
     error_details = json.dumps(error_details) if isinstance(error_details, dict) else error_details
     error_reason = event.get("error_reason", "")
     payload = event.get("payload", {})
@@ -96,10 +96,9 @@ def lambda_handler(event, context):
         try:
             result = connection.execute(inset_error_details)
             request_error_id = result.inserted_primary_key[0]
-            statusCode = 200
             response = {
-                "statusCode" : 200,
-                "msg" : "Error log created successfully",
+                "statusCode" : 500,
+                "msg" : error_reason,
                 "request_error_id" : request_error_id
             }
         except:

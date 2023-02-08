@@ -47,39 +47,48 @@ def lambda_handler(event, context):
                     "request_id": event["request_id"]
                 }
             else:
-                token = payload["token"]
-                headers["Authorization"] = "Bearer {}".format(token)
-                webserver = payload["webserver"]
-                referral_note_url = webserver.replace("xmlrpc/processrequest.aspx","").replace("processrequest", "api") + "referral/Notes"
-                for referral_id in event["referral_ids"]:
-                    data = {
-                        "referralid": int(referral_id[1:]),
-                        "notetext": note
-                    }
-                    response = requests.post(
-                        referral_note_url,
-                        data=json.dumps(data),
-                        headers=headers
-                    )
-                    try:
-                        response_data = json.loads(response.text)
-                    except:
-                        return {
-                        "status": 500,
-                        "msg": "Error while adding referral note",
-                        "error": "Error while adding referral note",
-                        "request_id": event["request_id"],
-                        "patient_id": event["patient_id"],
-                        "url": referral_note_url,
-                        "payload": data
+                try:
+                    token = payload["token"]
+                    headers["Authorization"] = "Bearer {}".format(token)
+                    webserver = payload["webserver"]
+                    referral_note_url = webserver.replace("xmlrpc/processrequest.aspx","").replace("processrequest", "api") + "referral/Notes"
+                    for referral_id in event["referral_ids"]:
+                        data = {
+                            "referralid": int(referral_id[1:]),
+                            "notetext": note
                         }
-                return {
-                    "status": 200,
-                    "msg": "Referral notes added successfully",
-                    "request_id": event["request_id"],
-                    "referral_ids": event["referral_ids"],
-                    "patient_id": event["patient_id"],
-                }
+                        response = requests.post(
+                            referral_note_url,
+                            data=json.dumps(data),
+                            headers=headers
+                        )
+                        try:
+                            response_data = json.loads(response.text)
+                        except:
+                            return {
+                            "status": 500,
+                            "msg": "Error while adding referral note",
+                            "error": "Error while adding referral note",
+                            "request_id": event["request_id"],
+                            "patient_id": event["patient_id"],
+                            "url": referral_note_url,
+                            "payload": data
+                            }
+                    return {
+                        "status": 200,
+                        "msg": "Referral notes added successfully",
+                        "request_id": event["request_id"],
+                        "referral_ids": event["referral_ids"],
+                        "patient_id": event["patient_id"],
+                    }
+                except Exception as e:
+                    return {
+                            "request_id": event.get("request_id", None),
+                            "payload": event.get("generic_json", {}),
+                            "is_validate": "failed",
+                            "error_reason": "Error while adding referral note [PATH: /functions/add_note_to_referral]",
+                            "error_exception": str(e)
+                        }
         else:
             return {
                     "status": 200,

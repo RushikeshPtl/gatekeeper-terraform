@@ -65,16 +65,25 @@ def lambda_handler(event, context):
             "request_id": event["request_id"]
         }
         else:
-            token = payload["token"]
-            webserver = payload["webserver"]
-            cookies = {"token": token}
-            resp = requests.post(
-                webserver,
-                headers=headers,
-                cookies=cookies,
-                json=pdata3,
-            )
-            res = json.loads(resp.text)
+            try:
+                token = payload["token"]
+                webserver = payload["webserver"]
+                cookies = {"token": token}
+                resp = requests.post(
+                    webserver,
+                    headers=headers,
+                    cookies=cookies,
+                    json=pdata3,
+                )
+                res = json.loads(resp.text)
+            except Exception as e:
+                return {
+                        "request_id": event.get("request_id", None),
+                        "payload": event.get("generic_json", {}),
+                        "is_validate": "failed",
+                        "error_reason": "Invalid parameters passed in add note for patient [PATH: /functions/add_note_for_patient]",
+                        "error_exception": str(e)
+                    }
             try:
                 if "Error" not in res["PPMDResults"] and "record" in res["PPMDResults"]:
                     return {

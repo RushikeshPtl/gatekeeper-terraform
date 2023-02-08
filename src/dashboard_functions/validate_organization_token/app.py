@@ -268,7 +268,7 @@ def lambda_handler(event, context):
                     "headers": response_headers,
                 }
             else:
-                raise ApiError(400, "Organization not found")
+                raise ApiError(400, "Invalid token")
         except ApiError as e:
             logger.error(e)
             return {

@@ -109,7 +109,7 @@ def lambda_handler(event, context):
                 roles.columns.role_level
             ]).select_from(join).where(text(
                 '''
-                    (username  = '{}'
+                    (username  ILIKE '{}'
                     OR email = '{}'
                     )
                     AND (archived = 'False')

@@ -86,7 +86,7 @@ def lambda_handler(event, context):
     client = session.client(service_name="secretsmanager", region_name=region_name)
     token, webserver, pmapiredirecturl = getToken()
     secret = {"token" : token, "webserver" : webserver, "pmapiredirecturl" : pmapiredirecturl}
-    # environment = os.environ["ENVIRONMENT"]
+    environment = os.environ["ENVIRONMENT"]
     secret_name = os.environ["AMD_SECRET_NAME"]
     print(secret_name)
     try:

@@ -1,7 +1,10 @@
 import boto3
 import os
 import json
+import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 ses_client = boto3.client("ses")
 
 def send_template_email(email, template_name, template_data):
@@ -91,7 +94,7 @@ def lambda_handler(event, context):
             "msg" : "Warm up triggered.............."
         }
     environment = os.environ["ENVIRONMENT"]
-    endpoint = os.environ["ENDPOINT"]
+    endpoint = os.environ["DEV_ENDPOINT"] if environment == "DEV" else os.environ["PROD_ENDPOINT"]
     mail_type = event["type"]
     email = event["email"] if environment == "" else "rushikesh.patil@anveshak.com"
     name = event.get("name", "")
@@ -124,7 +127,10 @@ def lambda_handler(event, context):
         msg = "Hi {},\nAuthentication tokens for organization '{}' has been changed.\nHere are the active tokens,".format(name, organization)
         msg += "\nReferral Token : {}".format(referral_token) if referral_token else ""
         msg += "\nDocumentation Token : {}".format(documentation_token) if documentation_token else ""
-        send_sms(msg, event.get("mobile", ""))
+        try:
+            send_sms(msg, event.get("mobile", ""))
+        except:
+            logger.info("Error while sending SMS to {}".format(event.get("mobile", "")))
         response = send_email(email=email, subject=subject, msg=msg)
     return {
         "statusCode" : 200,

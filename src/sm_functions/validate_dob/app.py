@@ -24,30 +24,41 @@ def lambda_handler(event, context):
         return {
             "msg" : "Warm up triggered.............."
         }
-    generic_json = event["generic_json"]
-    validation_check = event["validation_checks"]
-    client = generic_json["client"]
-    responsible = generic_json["responsible_party"]
-    ref_type=event["original_request"]["referral_provider"]
-    request_id = event.get("request_id", None)
-    validation_check["dob"] = []
-    if "dob" not in client.keys() or not client["dob"]:
-        validation_check["dob"].append("Missing dob for client")
-    elif datetime.strptime(client["dob"], "%Y-%m-%d") > datetime.now():
-        validation_check["dob"].append("Invalid dob of client")
-    if ref_type == "uft":
-        if responsible:
-            if "dob" not in responsible.keys() or not responsible["dob"]:
-                validation_check["dob"].append("Missing dob for responsible party")
-            elif datetime.strptime(responsible["dob"], "%Y-%m-%d") > datetime.now():
-                validation_check["dob"].append("Invalid dob of responsible party")
-    if validation_check["dob"] == []:
-        del validation_check["dob"]
+    try:
+        generic_json = event["generic_json"]
+        validation_check = event["validation_checks"]
+        client = generic_json["client"]
+        responsible = generic_json["responsible_party"]
+        ref_type=event["original_request"]["referral_provider"]
+        request_id = event.get("request_id", None)
+        validation_check["dob"] = []
+        if "dob" not in client.keys() or not client["dob"]:
+            validation_check["dob"].append("Missing dob for client")
+        elif datetime.strptime(client["dob"], "%Y-%m-%d") > datetime.now():
+            validation_check["dob"].append("Invalid dob of client")
+        if ref_type == "uft":
+            if responsible:
+                if "dob" not in responsible.keys() or not responsible["dob"]:
+                    validation_check["dob"].append("Missing dob for responsible party")
+                elif datetime.strptime(responsible["dob"], "%Y-%m-%d") > datetime.now():
+                    validation_check["dob"].append("Invalid dob of responsible party")
+        if validation_check["dob"] == []:
+            del validation_check["dob"]
 
-    return {
-            "status" : 200,
-            "validation_checks" : validation_check,
-            "original_request" : event["original_request"],
-            "generic_json" : generic_json,
-            "request_id" : request_id
-        }
+        return {
+                "status" : 200,
+                "msg" : "DOB Validation Completed",
+                "validation_checks" : validation_check,
+                "original_request" : event["original_request"],
+                "generic_json" : generic_json,
+                "request_id" : request_id
+            }
+    except Exception as e:
+        return {
+                "request_id": event.get("request_id", None),
+                "payload": event.get("generic_json", {}),
+                "is_validate": "failed",
+                "error_reason": "Rererral DOB vallidation failed [PATH: /validate_referral/validate_dob]",
+                "error_exception": str(e),
+                "msg": "Log Error",
+            }

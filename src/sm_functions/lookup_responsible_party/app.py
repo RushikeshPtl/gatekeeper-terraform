@@ -57,50 +57,61 @@ def lambda_handler(event, context):
             "request_id": event["request_id"]
         }
     else:
-        token = payload["token"]
-        webserver = payload["webserver"]
-        cookies = {"token": token}
-        resp = requests.post(
-            webserver, headers=headers, cookies=cookies, json=pdata
-        )
-        res = json.loads(resp.text)
-        generic_json_p = event["generic_json"]
-        lastname = responsible_party["lastname"] + "," if responsible_party["lastname"] else ""
-        firstname = responsible_party["firstname"] if responsible_party["firstname"] else ""
-        middleinitial = " " + responsible_party["middle_initial"] if responsible_party["middle_initial"] else ""
-        grName = lastname + firstname + middleinitial
-        grDob = responsible_party["dob"]
         try:
-            if res["PPMDResults"]["Error"] is not None:
-                return {
-                    "status_code": "200",
-                    "msg": "Error while looking for responsible party",
-                    "error_json": res["PPMDResults"]["Error"],
-                    "request_id": event["request_id"],
-                    "generic_json": generic_json_p,
-                    "url" : webserver,
-                    "payload" : pdata
-                }
-            elif int(res["PPMDResults"]["Results"]["resppartylist"]["@itemcount"]) >= 1:
-                respPartyList = res["PPMDResults"]["Results"]["resppartylist"]["respparty"]
-                respPartyItemcount = res["PPMDResults"]["Results"]["resppartylist"][
-                    "@itemcount"
-                ]
-                RespList = (
-                    [respPartyList] if int(respPartyItemcount) == 1 else respPartyList
-                )
-                respParty_id = RespParties(RespList, grName, grDob)
-                if respParty_id:
-                    msg = "Add patient" if "patient_id" not in event.keys() else "Add patient note"
-                    patient_id = None if "patient_id" not in event.keys() else event["patient_id"]
+            token = payload["token"]
+            webserver = payload["webserver"]
+            cookies = {"token": token}
+            resp = requests.post(
+                webserver, headers=headers, cookies=cookies, json=pdata
+            )
+            res = json.loads(resp.text)
+            generic_json_p = event["generic_json"]
+            lastname = responsible_party["lastname"] + "," if responsible_party["lastname"] else ""
+            firstname = responsible_party["firstname"] if responsible_party["firstname"] else ""
+            middleinitial = " " + responsible_party["middle_initial"] if responsible_party["middle_initial"] else ""
+            grName = lastname + firstname + middleinitial
+            grDob = responsible_party["dob"]
+            try:
+                if res["PPMDResults"]["Error"] is not None:
                     return {
-                        "status_code": 200,
-                        "msg": msg,
-                        "responsible_party_id": respParty_id,
+                        "status_code": "200",
+                        "msg": "Error while looking for responsible party",
+                        "error_json": res["PPMDResults"]["Error"],
                         "request_id": event["request_id"],
                         "generic_json": generic_json_p,
-                        "patient_id": patient_id
+                        "url" : webserver,
+                        "payload" : pdata
                     }
+                elif int(res["PPMDResults"]["Results"]["resppartylist"]["@itemcount"]) >= 1:
+                    respPartyList = res["PPMDResults"]["Results"]["resppartylist"]["respparty"]
+                    respPartyItemcount = res["PPMDResults"]["Results"]["resppartylist"][
+                        "@itemcount"
+                    ]
+                    RespList = (
+                        [respPartyList] if int(respPartyItemcount) == 1 else respPartyList
+                    )
+                    respParty_id = RespParties(RespList, grName, grDob)
+                    if respParty_id:
+                        msg = "Add patient" if "patient_id" not in event.keys() else "Add patient note"
+                        patient_id = None if "patient_id" not in event.keys() else event["patient_id"]
+                        return {
+                            "status_code": 200,
+                            "msg": msg,
+                            "responsible_party_id": respParty_id,
+                            "request_id": event["request_id"],
+                            "generic_json": generic_json_p,
+                            "patient_id": patient_id
+                        }
+                    else:
+                        msg = event["msg"]
+                        patient_id = event["patient_id"] if "patient_id" in event.keys() else None
+                        return {
+                            "status_code": 200,
+                            "msg": msg,
+                            "request_id": event["request_id"],
+                            "generic_json": generic_json_p,
+                            "patient_id": patient_id
+                        }
                 else:
                     msg = event["msg"]
                     patient_id = event["patient_id"] if "patient_id" in event.keys() else None
@@ -111,24 +122,23 @@ def lambda_handler(event, context):
                         "generic_json": generic_json_p,
                         "patient_id": patient_id
                     }
-            else:
-                msg = event["msg"]
-                patient_id = event["patient_id"] if "patient_id" in event.keys() else None
+            except:
                 return {
-                    "status_code": 200,
-                    "msg": msg,
+                    "error_code": 500,
+                    "msg": "Log Error",
+                    "error_type" : "Error while calling AMD API",
+                    "error_details": res,
+                    "error_reason": resp.reason,
                     "request_id": event["request_id"],
-                    "generic_json": generic_json_p,
-                    "patient_id": patient_id
+                    "url": webserver,
+                    "payload": pdata
                 }
-        except:
+        except Exception as e:
             return {
-                "error_code": 500,
-                "msg": "Log Error",
-                "error_type" : "Error while calling AMD API",
-                "error_details": res,
-                "error_reason": resp.reason,
-                "request_id": event["request_id"],
-                "url": webserver,
-                "payload": pdata
-            }
+                    "request_id": event.get("request_id", None),
+                    "payload": event.get("generic_json", {}),
+                    "is_validate": "failed",
+                    "error_reason": "Something went wrong in lookup responsible party [PATH: /functions/lookup_responsible_party]",
+                    "error_exception": str(e),
+                    "msg": "Log Error",
+                }

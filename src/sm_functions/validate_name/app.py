@@ -23,53 +23,64 @@ def lambda_handler(event, context):
         return {
             "msg" : "Warm up triggered.............."
         }
-    generic_json = event["generic_json"]
-    validation_check = event["validation_checks"]
-    responsible = generic_json["responsible_party"]
-    client = generic_json["client"]
-    request_id = event.get("request_id", None)
-    validation_check["name"] = []
-    if "firstname" not in client.keys() or not client["firstname"]:
-        validation_check["name"].append("Missing firstname for client")
-    elif isinstance(client["firstname"], str) and client["firstname"].lower() in ["none", "null"]:
-        validation_check["name"].append("Client firstname can't be none/null")
-    elif type(client["firstname"]) != str or all(
-        str.isdigit(char) for char in client["firstname"]
-    ):
-        validation_check["name"].append("Client firstname is not a string")
-    if "lastname" not in client.keys() or not client["lastname"]:
-        validation_check["name"].append("Missing lastname for client")
-    elif isinstance(client["lastname"], str) and client["lastname"].lower() in ["none", "null"]:
-        validation_check["name"].append("Client lastname can't be none/null")
-    elif type(client["lastname"]) != str or all(
-        str.isdigit(char) for char in client["lastname"]
-    ):
-        validation_check["name"].append("Client last name is not a string")
-
-    if responsible:
-        if "firstname" not in responsible.keys() or not responsible["firstname"]:
-            validation_check["name"].append("Missing firstname for responsible")
-        elif isinstance(responsible["firstname"], str) and responsible["firstname"].lower() in ["none", "null"]:
-            validation_check["name"].append("Responsible firstname can't be none/null") 
-        elif type(responsible["firstname"]) != str or all(
-            str.isdigit(char) for char in responsible["firstname"]
+    try:
+        generic_json = event["generic_json"]
+        validation_check = event["validation_checks"]
+        responsible = generic_json["responsible_party"]
+        client = generic_json["client"]
+        request_id = event.get("request_id", None)
+        validation_check["name"] = []
+        if "firstname" not in client.keys() or not client["firstname"] or sum(not chr.isspace() for chr in client["firstname"]) < 1:
+            validation_check["name"].append("Missing firstname for client")
+        elif isinstance(client["firstname"], str) and client["firstname"].lower() in ["none", "null"]:
+            validation_check["name"].append("Client firstname can't be none/null")
+        elif type(client["firstname"]) != str or all(
+            str.isdigit(char) for char in client["firstname"]
         ):
-            validation_check["name"].append("Responsible firstname is not a string")
-        if "lastname" not in responsible.keys() or not responsible["lastname"]:
-            validation_check["name"].append("Missing lastname for responsible")
-        elif isinstance(responsible["lastname"], str) and responsible["lastname"].lower() in ["none", "null"]:
-            validation_check["name"].append("Responsible lastname can't be none/null")
-        elif type(responsible["lastname"]) != str or all(
-            str.isdigit(char) for char in responsible["lastname"]
+            validation_check["name"].append("Client firstname is not a string")
+        if "lastname" not in client.keys() or not client["lastname"] or sum(not chr.isspace() for chr in client["lastname"]) < 1:
+            validation_check["name"].append("Missing lastname for client")
+        elif isinstance(client["lastname"], str) and client["lastname"].lower() in ["none", "null"]:
+            validation_check["name"].append("Client lastname can't be none/null")
+        elif type(client["lastname"]) != str or all(
+            str.isdigit(char) for char in client["lastname"]
         ):
-            validation_check["name"].append("Responsible last name is not a string")
-    if validation_check["name"] == []:
-        del validation_check["name"]
+            validation_check["name"].append("Client last name is not a string")
 
-    return {
-            "status" : 200,
-            "validation_checks" : validation_check,
-            "original_request" : event["original_request"],
-            "generic_json" : generic_json,
-            "request_id" : request_id
-        }
+        if responsible:
+            if "firstname" not in responsible.keys() or not responsible["firstname"] or sum(not chr.isspace() for chr in responsible["firstname"]) < 1:
+                validation_check["name"].append("Missing firstname for responsible")
+            elif isinstance(responsible["firstname"], str) and responsible["firstname"].lower() in ["none", "null"]:
+                validation_check["name"].append("Responsible firstname can't be none/null") 
+            elif type(responsible["firstname"]) != str or all(
+                str.isdigit(char) for char in responsible["firstname"]
+            ):
+                validation_check["name"].append("Responsible firstname is not a string")
+            if "lastname" not in responsible.keys() or not responsible["lastname"] or sum(not chr.isspace() for chr in responsible["lastname"]) < 1:
+                validation_check["name"].append("Missing lastname for responsible")
+            elif isinstance(responsible["lastname"], str) and responsible["lastname"].lower() in ["none", "null"]:
+                validation_check["name"].append("Responsible lastname can't be none/null")
+            elif type(responsible["lastname"]) != str or all(
+                str.isdigit(char) for char in responsible["lastname"]
+            ):
+                validation_check["name"].append("Responsible last name is not a string")
+        if validation_check["name"] == []:
+            del validation_check["name"]
+
+        return {
+                "status" : 200,
+                "validation_checks" : validation_check,
+                "msg" : "Name Validation Completed",
+                "original_request" : event["original_request"],
+                "generic_json" : generic_json,
+                "request_id" : request_id
+            }
+    except Exception as e:
+        return {
+                "request_id": event.get("request_id", None),
+                "payload": event.get("generic_json", {}),
+                "is_validate": "failed",
+                "error_reason": "Rererral name vallidation failed",
+                "error_exception": str(e),
+                "msg": "Log Error",
+            }

@@ -122,40 +122,49 @@ def lambda_handler(event, context):
             "request_id": event["request_id"]
         }
     else:
-        token = payload["token"]
-        webserver = payload["webserver"]
-        cookies = {"token": token}
-        resp = requests.post(
-            webserver, headers=headers, cookies=cookies, json=pdata
-        )
-        res = json.loads(resp.text)
         try:
-            if res["PPMDResults"]["Results"]["@success"] == "1":
-                patient_id = res["PPMDResults"]["Results"]["patientlist"]["patient"]["@id"]
+            token = payload["token"]
+            webserver = payload["webserver"]
+            cookies = {"token": token}
+            resp = requests.post(
+                webserver, headers=headers, cookies=cookies, json=pdata
+            )
+            res = json.loads(resp.text)
+            try:
+                if res["PPMDResults"]["Results"]["@success"] == "1":
+                    patient_id = res["PPMDResults"]["Results"]["patientlist"]["patient"]["@id"]
+                    return {
+                        "status_code": 200,
+                        "msg": "Add Patient Note",
+                        "patient_id": patient_id,
+                        "request_id": event["request_id"],
+                        "generic_json": generic_json,
+                    }
+                elif res["PPMDResults"]["Results"]["@success"] == "0":
+                    return {
+                        "status_code": 200,
+                        "msg": "Error while adding patient",
+                        "request_id": event["request_id"],
+                        "error_json": res["PPMDResults"],
+                        "url": webserver,
+                        "payload": pdata
+                    }
+            except:
                 return {
-                    "status_code": 200,
-                    "msg": "Add Patient Note",
-                    "patient_id": patient_id,
+                    "status_code": 500,
+                    "msg": "Log Error",
+                    "error_type" : "Error while adding patient",
+                    "error_details": res,
+                    "error_reason": resp.reason,
                     "request_id": event["request_id"],
-                    "generic_json": generic_json,
-                }
-            elif res["PPMDResults"]["Results"]["@success"] == "0":
-                return {
-                    "status_code": 200,
-                    "msg": "Error while adding patient",
-                    "request_id": event["request_id"],
-                    "error_json": res["PPMDResults"],
                     "url": webserver,
                     "payload": pdata
                 }
-        except:
+        except Exception as e:
             return {
-                "status_code": 500,
-                "msg": "Log Error",
-                "error_type" : "Error while adding patient",
-                "error_details": res,
-                "error_reason": resp.reason,
-                "request_id": event["request_id"],
-                "url": webserver,
-                "payload": pdata
-            }
+                    "request_id": event.get("request_id", None),
+                    "payload": event.get("generic_json", {}),
+                    "is_validate": "failed",
+                    "error_reason": "Error while adding patient [PATH: /functions/add_patient]",
+                    "error_exception": str(e)
+                }

@@ -209,21 +209,21 @@ def lambda_handler(event, context):
             '''
             connection.execute(role_updated_trigger)
 
-            # insert_roles = role_table.insert().values(
-            #     [
-            #         {"name" : "Super Administrator", "role" : "Super Administrator", "is_provider" : False},
-            #         {"name" : "Administrator", "role" : "Administrator", "is_provider" : False},
-            #         {"name" : "Account Administrator", "role" : "Account Administrator", "is_provider" : False},
-            #         {"name" : "Organization Authorized Personnel", "role" : "Organization Authorized Personnel", "is_provider" : False},
-            #         {"name" : "Organization Administrator", "role" : "Organization Administrator", "is_provider" : False},
-            #         {"name" : "Therapist", "role" : "Therapist", "is_provider" : True},
-            #         {"name" : "Teacher", "role" : "Teacher", "is_provider" : False},
-            #         {"name" : "Client", "role" : "Client", "is_provider" : False},
-            #         {"name" : "Nurse Practitioner", "role" : "Nurse Practitioner", "is_provider" : True},
-            #         {"name" : "Classroom", "role" : "Classroom", "is_provider" : False}
-            #     ]
-            # )
-            # connection.execute(insert_roles)
+            insert_roles = role_table.insert().values(
+                [
+                    {"name" : "Super Administrator", "role" : "Super Administrator", "is_provider" : False},
+                    {"name" : "Administrator", "role" : "Administrator", "is_provider" : False},
+                    {"name" : "Account Administrator", "role" : "Account Administrator", "is_provider" : False},
+                    {"name" : "Organization Authorized Personnel", "role" : "Organization Authorized Personnel", "is_provider" : False},
+                    {"name" : "Organization Administrator", "role" : "Organization Administrator", "is_provider" : False},
+                    {"name" : "Therapist", "role" : "Therapist", "is_provider" : True},
+                    {"name" : "Teacher", "role" : "Teacher", "is_provider" : False},
+                    {"name" : "Client", "role" : "Client", "is_provider" : False},
+                    {"name" : "Nurse Practitioner", "role" : "Nurse Practitioner", "is_provider" : True},
+                    {"name" : "Classroom", "role" : "Classroom", "is_provider" : False}
+                ]
+            )
+            connection.execute(insert_roles)
         else:
             print("Table roles already exists.........................................")
 
@@ -635,6 +635,34 @@ def lambda_handler(event, context):
             connection.execute(referral_request_notes_updated_trigger)
         else:
             print("Table referral_requests_notes already exists.....................")
+
+        #---- Create Table to Log API and UI error Details ----#
+        if not engine.dialect.has_table(connection, "error_logs"):
+            print("Creating error_logs table...........................")
+
+            error_logs = Table(
+                "error_logs", meta,
+                Column("id", Integer, primary_key = True),
+                Column("url", String(255)),
+                Column("payload", JSON),
+                Column("error_type", String(255)),
+                Column("error_details", Text),
+                Column("error_reason", Text),
+                Column("created_at", DateTime(timezone=True), server_default=func.now()),
+                Column("updated_at", DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+            )
+
+            meta.create_all(engine)
+
+            request_error_updated_trigger = '''
+                CREATE TRIGGER set_error_logs_updated_at
+                BEFORE UPDATE ON error_logs
+                FOR EACH ROW
+                EXECUTE PROCEDURE trigger_set_timestamp();
+            '''
+            connection.execute(request_error_updated_trigger)
+        else:
+            print("Table error_logs already exists.....................")
 
 
         return {"status_code": 200, "msg": "Changes migrated successfully"}

@@ -42,59 +42,67 @@ def lambda_handler(event, context):
             "error": payload["error"]
         }
     else:
-        generic_json = event["generic_json"]
-        client_firstname = escape_apostrophe(generic_json["client"]["firstname"]) if generic_json["client"]["firstname"] else ""
-        client_lastname = escape_apostrophe(generic_json["client"]["lastname"]) if generic_json["client"]["lastname"] else ""
-        client_dob = generic_json["client"]["dob"]
-        credentials = payload["credentials"]
-        engine = create_engine(
-            "postgresql+psycopg2://{}:{}@{}/{}".format(
-                credentials["username"],
-                credentials["password"],
-                credentials["host"],
-                credentials["db"],
+        try:
+            generic_json = event["generic_json"]
+            client_firstname = escape_apostrophe(generic_json["client"]["firstname"]) if generic_json["client"]["firstname"] else ""
+            client_lastname = escape_apostrophe(generic_json["client"]["lastname"]) if generic_json["client"]["lastname"] else ""
+            client_dob = generic_json["client"]["dob"]
+            credentials = payload["credentials"]
+            engine = create_engine(
+                "postgresql+psycopg2://{}:{}@{}/{}".format(
+                    credentials["username"],
+                    credentials["password"],
+                    credentials["host"],
+                    credentials["db"],
+                )
             )
-        )
-        meta = MetaData(engine)
-        connection = engine.connect()
-        generic_json = event["generic_json"]
-        referral_requests = Table(
-            "referral_requests",
-            meta,
-            autoload=True,
-            autoload_with=engine
-        )
+            meta = MetaData(engine)
+            connection = engine.connect()
+            generic_json = event["generic_json"]
+            referral_requests = Table(
+                "referral_requests",
+                meta,
+                autoload=True,
+                autoload_with=engine
+            )
 
-        stmt = select([
-            referral_requests.columns.id,
-        ]).where(text(
-                        '''
-                            internal_request -> 'client' ->> 'firstname' = '{}'
-                            AND internal_request -> 'client' ->> 'lastname' = '{}'
-                            AND internal_request -> 'client' ->> 'dob' = '{}'
-                            AND archived = false
-                        '''.format(client_firstname, client_lastname, client_dob)
-                    ))
-        results = connection.execute(stmt).fetchall()
-        if results:
-            connection.close()
+            stmt = select([
+                referral_requests.columns.id,
+            ]).where(text(
+                            '''
+                                internal_request -> 'client' ->> 'firstname' = '{}'
+                                AND internal_request -> 'client' ->> 'lastname' = '{}'
+                                AND internal_request -> 'client' ->> 'dob' = '{}'
+                                AND archived = false
+                            '''.format(client_firstname, client_lastname, client_dob)
+                        ))
+            results = connection.execute(stmt).fetchall()
+            if results:
+                connection.close()
+                return {
+                    "status_code": 200,
+                    "msg": "Duplicate Request Found",
+                    "duplicate_request_ids": [result[0] for result in results],
+                    "validation_checks" : event["validation_checks"],
+                    "original_request" : event["original_request"],
+                    "generic_json" : generic_json
+                }
+            else:
+                connection.close()
+                return {
+                    "status_code": 200,
+                    "msg": "Duplicate Not Found",
+                    "validation_checks" : event["validation_checks"],
+                    "original_request" : event["original_request"],
+                    "generic_json" : generic_json
+                }
+        except Exception as e:
             return {
-                "status_code": 200,
-                "msg": "Duplicate Request Found",
-                "duplicate_request_ids": [result[0] for result in results],
-                "validation_checks" : event["validation_checks"],
-                "original_request" : event["original_request"],
-                "generic_json" : generic_json
-            }
-        else:
-            connection.close()
-            return {
-                "status_code": 200,
-                "msg": "Duplicate Not Found",
-                "validation_checks" : event["validation_checks"],
-                "original_request" : event["original_request"],
-                "generic_json" : generic_json
-            }
-
-
+                    "request_id": event.get("request_id", None),
+                    "payload": event.get("generic_json", {}),
+                    "is_validate": "failed",
+                    "error_reason": "Error while finding duplicate request [PATH: /functions/find_duplicate_request]",
+                    "error_exception": str(e),
+                    "msg": "Log Error",
+                }
 
