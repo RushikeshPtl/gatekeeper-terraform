@@ -107,15 +107,6 @@ def lambda_handler(event, context):
         session = authenticate(token)
         if "user_id" in session:
             user_id = session["user_id"]
-            sp_name=name.split(" ")
-            opr="AND"
-            if len(sp_name) == 1 and sp_name[0] == "":
-                firstname, lastname = "%", "%"
-            elif len(sp_name) < 2:
-                firstname, lastname = sp_name[0], sp_name[0]
-                opr = "OR"
-            else:
-                firstname, lastname = sp_name[0], sp_name[1]
 
             if status=="Failed":
                 search_status="AND (emr_status = 2 OR emr_status IS NULL)"
@@ -189,7 +180,6 @@ def lambda_handler(event, context):
                         autoload_with=engine
                     )
 
-
                 users_table = Table(
                         'users',
                         metadata,
@@ -198,10 +188,9 @@ def lambda_handler(event, context):
                     )
                 join = table.join(request_error_details, and_(request_error_details.columns.request_id == table.columns.id, request_error_details.columns.archived == False), isouter = True)
                 name_condition = '''
-                    (internal_request -> 'client' ->> 'firstname' Ilike '{}%'
-                    {} internal_request -> 'client' ->> 'lastname' Ilike '{}%')
-                    AND
-                '''.format(escape_apostrophe(firstname), opr, escape_apostrophe(lastname)) if name else ""
+                (internal_request -> 'client' ->> 'firstname') ||' '|| (internal_request -> 'client' ->> 'lastname') Ilike '%{}%'
+                AND
+                '''.format(escape_apostrophe(name) if name else "")
                 stmt = select([
                         table.columns.id,
                         table.columns.referral_from,

@@ -1,3 +1,7 @@
+from datetime import datetime
+import json
+from random import randint
+from uuid import uuid4
 import boto3
 import json
 import os
@@ -74,7 +78,8 @@ def lambda_handler(event, context):
     resource = event.get("resource", "")
     client = boto3.client("stepfunctions")
     referral_from = "uft" if resource == "/api/member" else event["pathParameters"]["type"]
-    state_machine_arn = os.environ["VALIDATE_REFERRAL_SM_ARN"]
+    environment = os.environ["ENVIRONMENT"]
+    account_id = os.environ["ACCOUNT_ID"]
     request_id = event["pathParameters"]["request_id"] if "pathParameters" in event and event["pathParameters"] and "request_id" in event["pathParameters"] else None
     token = event["queryStringParameters"].get("token", None) if "queryStringParameters" in event and event["queryStringParameters"] else None
     if request_id:
@@ -98,19 +103,31 @@ def lambda_handler(event, context):
         data = json.loads(event["body"])
         data["referral_provider"] = referral_from.lower()
         data["request_id"] = request_id
-        data["referral_type"] = "uft"
-        # uft_stepmachine_arn
-        response = client.start_sync_execution(
-            stateMachineArn=state_machine_arn,
-            name="AddUFTReferralToEMR",
-            input=json.dumps(data)
-        )
-        return {
-            "statusCode": 200,
-            "headers": response_headers,
-            "body": response["output"],
-            "isBase64Encoded": False,
-        }
+        
+        if not referral_from:
+            return {
+                "statusCode": 400,
+                "headers": response_headers,
+                "body": json.dumps({
+                    "msg": "Failed with issues: Please provide valid referral provider",
+                    "code": 200
+                }
+                ),
+                "isBase64Encoded": False,
+            }
+        else:
+            # stepmachine_arn
+            response = client.start_sync_execution(
+                stateMachineArn="arn:aws:states:us-east-1:{}:stateMachine:{}AddUFTReferralToEMR".format(account_id, environment),
+                name="AddUFTReferralToEMR",
+                input=json.dumps(data)
+            )
+            return {
+                "statusCode": 200,
+                "headers": response_headers,
+                "body": response["output"],
+                "isBase64Encoded": False,
+            }
     else:
         response = {
             "statusCode": 400,

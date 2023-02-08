@@ -9,6 +9,14 @@ response_headers = {
                     "Access-Control-Allow-Methods": "GET",
                 }
 lambda_client = boto3.client("lambda")
+
+def escape_apostrophe(string):
+    items = string.split("'")
+    new_string = items[0]
+    for i in items[1:]:
+        new_string += "''" + i
+    return new_string
+
 def authenticate(token):
     '''
         Invokes the GetSessionUser to verify the session token & fetch user_id
@@ -116,16 +124,6 @@ def lambda_handler(event, context):
             else:
                 search_role=""
 
-            sp_name=name.split(" ")
-            opr="AND"
-            if len(sp_name) == 1 and sp_name[0] == "":
-                firstname, lastname = "%", "%"
-            elif len(sp_name) < 2:
-                firstname, lastname = sp_name[0], sp_name[0]
-                opr = "OR"
-            else:
-                firstname, lastname = sp_name[0], sp_name[1]
-
             lambda_client = boto3.client("lambda")
             response = lambda_client.invoke(
                 FunctionName=os.environ["GET_SECRET_ARN"],
@@ -185,13 +183,12 @@ def lambda_handler(event, context):
                         roles_table.columns.role
                         ]).select_from(joined_table).where(text(
                         """
-                            (first_name Ilike '{}'
-                            {} last_name Ilike '{}')
+                            (first_name||' '||last_name Ilike '%{}%')
                             AND role_level > {}
                             {}
                             {}
 
-                        """.format(firstname,opr, lastname, session["role_level"], search_archived, search_role)
+                        """.format(escape_apostrophe(name), session["role_level"], search_archived, search_role)
                 )).limit(
                 event["queryStringParameters"].get("limit",10) if "queryStringParameters" in event and event["queryStringParameters"] != None else 10
                 ).offset(
@@ -200,12 +197,11 @@ def lambda_handler(event, context):
 
                 count_stmt=select([func.count(users_table.columns.id)]).select_from(joined_table).where(text(
                         """
-                            (first_name Ilike '{}'
-                            {} last_name Ilike '{}')
+                            (first_name||' '||last_name Ilike '%{}%')
                             AND role_level > {}
                             {}
                             {}
-                        """.format(firstname, opr, lastname, session["role_level"], search_archived, search_role)
+                        """.format(escape_apostrophe(name), session["role_level"], search_archived, search_role)
                         ))
 
                 connection = engine.connect()

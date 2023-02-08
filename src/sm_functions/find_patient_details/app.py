@@ -138,67 +138,75 @@ def lambda_handler(event, context):
             "request_id": event["request_id"]
         }
     else:
-        token = payload["token"]
-        webserver = payload["webserver"]
-        cookies = {"token": token}
-        resp = requests.post(webserver, headers=headers, cookies=cookies, json=pdata)
+        try:
+            token = payload["token"]
+            webserver = payload["webserver"]
+            cookies = {"token": token}
+            resp = requests.post(webserver, headers=headers, cookies=cookies, json=pdata)
 
-        res = json.loads(resp.text)
+            res = json.loads(resp.text)
 
-        generic_json_p = event["generic_json"]
-        gclient = generic_json_p["client"]
-        middlename = " " + event["generic_json"]["client"]["middle_initial"] if event["generic_json"]["client"]["middle_initial"] else ""
-        gcName = gclient["lastname"] + "," + gclient["firstname"] + middlename
-        gcDob = datetime.datetime.strptime(gclient["dob"], "%Y-%m-%d").date()
-        msg = " & responsible party" if "responsible_party" in generic_json_p and generic_json_p["responsible_party"] else ""
-        lookup_patients = lookup_patient(webserver, cookies, headers, event, 1)
-        if not "msg" in lookup_patients:
-            item_count = int(lookup_patients["@itemcount"])
-            if item_count > 0:
-                patientList = lookup_patients["patient"] if item_count > 1 else [lookup_patients["patient"]]
-                pages = int(lookup_patients["@pagecount"])
-                if pages > 1:
-                    for page in range(2, pages):
-                        patients = lookup_patient(webserver, cookies, headers, event, page)
-                        if not "msg" in patients:
-                            patients = [patients["patient"]] if not isinstance(patients["patient"], list) else patients["patient"]
-                            patientList.extend(patients)
+            generic_json_p = event["generic_json"]
+            gclient = generic_json_p["client"]
+            middlename = " " + event["generic_json"]["client"]["middle_initial"] if event["generic_json"]["client"]["middle_initial"] else ""
+            gcName = gclient["lastname"].strip() + "," + gclient["firstname"].strip() + middlename.strip()
+            gcDob = datetime.datetime.strptime(gclient["dob"], "%Y-%m-%d").date()
+            msg = " & responsible party" if "responsible_party" in generic_json_p and generic_json_p["responsible_party"] else ""
+            lookup_patients = lookup_patient(webserver, cookies, headers, event, 1)
+            if not "msg" in lookup_patients:
+                item_count = int(lookup_patients["@itemcount"])
+                if item_count > 0:
+                    patientList = lookup_patients["patient"] if item_count > 1 else [lookup_patients["patient"]]
+                    pages = int(lookup_patients["@pagecount"])
+                    if pages > 1:
+                        for page in range(2, pages):
+                            patients = lookup_patient(webserver, cookies, headers, event, page)
+                            if not "msg" in patients:
+                                patients = [patients["patient"]] if not isinstance(patients["patient"], list) else patients["patient"]
+                                patientList.extend(patients)
+                            else:
+                                return patients
+                    patient_id = Patients(patientList, gcName, gcDob)
+                    if patient_id:
+                        if "responsible_party" in generic_json_p and generic_json_p["responsible_party"]:
+                            resp_id = compare_responsible_party(
+                                patient_id,
+                                generic_json_p["responsible_party"],
+                                webserver,
+                                headers,
+                                cookies,
+                            )
+                            if resp_id:
+                                return {
+                                    "status_code": 200,
+                                    "msg": "Patient & Responsible already registered",
+                                    "patient_id": patient_id,
+                                    "request_id": event["request_id"],
+                                    "responsible_party_id": resp_id,
+                                    "generic_json": generic_json_p
+                                }
+                            else:
+                                return {
+                                    "status_code": 200,
+                                    "msg": "Add responsible party",
+                                    "patient_id": patient_id,
+                                    "request_id": event["request_id"],
+                                    "generic_json": generic_json_p,
+                                }
                         else:
-                            return patients
-                patient_id = Patients(patientList, gcName, gcDob)
-                if patient_id:
-                    if "responsible_party" in generic_json_p and generic_json_p["responsible_party"]:
-                        resp_id = compare_responsible_party(
-                            patient_id,
-                            generic_json_p["responsible_party"],
-                            webserver,
-                            headers,
-                            cookies,
-                        )
-                        if resp_id:
                             return {
                                 "status_code": 200,
-                                "msg": "Patient & Responsible already registered",
-                                "patient_id": patient_id,
-                                "request_id": event["request_id"],
-                                "responsible_party_id": resp_id,
-                                "generic_json": generic_json_p
-                            }
-                        else:
-                            return {
-                                "status_code": 200,
-                                "msg": "Add responsible party",
-                                "patient_id": patient_id,
-                                "request_id": event["request_id"],
+                                "msg": "Patient exists & Responsible party not present in generic",
                                 "generic_json": generic_json_p,
+                                "request_id": event["request_id"],
+                                "patient_id": patient_id
                             }
                     else:
                         return {
                             "status_code": 200,
-                            "msg": "Patient exists & Responsible party not present in generic",
-                            "generic_json": generic_json_p,
+                            "msg": "Add patient" + msg,
                             "request_id": event["request_id"],
-                            "patient_id": patient_id
+                            "generic_json": generic_json_p,
                         }
                 else:
                     return {
@@ -208,11 +216,13 @@ def lambda_handler(event, context):
                         "generic_json": generic_json_p,
                     }
             else:
-                return {
-                    "status_code": 200,
-                    "msg": "Add patient" + msg,
-                    "request_id": event["request_id"],
-                    "generic_json": generic_json_p,
+                return lookup_patients
+        except Exception as e:
+            return {
+                    "request_id": event.get("request_id", None),
+                    "payload": event.get("generic_json", {}),
+                    "is_validate": "failed",
+                    "error_reason": "Error while finding patient details [PATH: /functions/find_patient_details]",
+                    "error_exception": str(e),
+                    "msg": "Log Error",
                 }
-        else:
-            return lookup_patients

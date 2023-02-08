@@ -6,8 +6,9 @@ import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+lambda_client = boto3.client("lambda")
+
 def notify(email, phone, name, organization):
-    lambda_client = boto3.client("lambda")
     send_email = lambda_client.invoke(
                             FunctionName=os.environ["SEND_EMAIL_ARN"],
                             InvocationType="Event",

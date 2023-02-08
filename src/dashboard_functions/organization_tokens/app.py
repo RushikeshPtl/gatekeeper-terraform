@@ -155,7 +155,6 @@ def validate_body(body):
 def get_tokens_bucket():
     s3_client = boto3.client("s3")
     bucket = os.environ["STAGE_S3_BUCKET"] if os.environ["ENVIRONMENT"] == "dev" else os.environ["PROD_S3_BUCKET"]
-
     return s3_client, bucket
 
 
