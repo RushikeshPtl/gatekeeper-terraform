@@ -94,7 +94,7 @@ inputs = {
     api_paths = [
         {
             "method" = "GET",
-            "path"   = "/get_referral_list"
+            "path"   = "/organization/active/referral/token"
         }
     ]
 }
